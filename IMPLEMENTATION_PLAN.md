@@ -1,559 +1,198 @@
-# One-Week Modular Implementation Blueprint
+# Implementation Plan
+## Urdu DHH Intelligent Personal Assistant
 
-## DHH Access to Intelligent Personal Assistants --- LLM Touch Interface + Urdu Prototype
+**Project:** Deaf and Hard of Hearing Access to Intelligent Personal Assistants  
+**Prototype:** Comparing voice-based input with an LLM-powered touch interface adapted for Urdu  
+**Timeline:** 7 days  
+**Branch:** `dev`
 
-**Team:** Muhammad Ibrahim, Faraz Ansari, Ashhal Aamir\
-**Deadline:** 7 calendar days maximum\
-**Primary objective:** Deliver a working, demonstrable prototype in
-which a user selects a smart-home action through a touch interface, the
-backend uses an LLM to help construct a command, the user confirms it,
-and a mock assistant reports the result. Include a basic Urdu/RTL mode
-if feasible.
+---
 
-> **Scope boundary:** The team's presentation describes an existing CHI
-> 2026 study and proposes an Urdu replication. This plan covers a
-> prototype inspired by the described workflow. It does not imply access
-> to the original implementation, completion of a Pakistani participant
-> study, or validation of Urdu research instruments.
+# Part 1 — System Architecture
 
-------------------------------------------------------------------------
+## 1.1 Objective
 
-## 1. Delivery strategy
+Build a functional prototype that allows Deaf and Hard of Hearing (DHH) users to interact with an intelligent personal assistant through a visual, touch-based interface.
 
-Use three workstreams that can be developed in parallel against a shared
-contract:
+The user should be able to select an intended action, choose a task, answer clarification questions, review a proposed command, explicitly confirm it, and observe its simulated execution.
 
-1.  **Frontend and localization** --- tablet UI, workflow screens,
-    Urdu/English labels, RTL layout.
-2.  **Backend and AI orchestration** --- Flask API, session state, LLM
-    adapter, validation, confirmation rules.
-3.  **Mock smart-home integration, testing, and demo** --- device
-    catalog, command execution simulator, API contract tests, end-to-end
-    testing, README/demo.
+The initial implementation targets an Urdu-speaking context in Pakistan, with English support retained for development and testing.
 
-The third workstream is deliberately implementation-oriented, not just
-documentation. It owns the mock device adapter and integration tests so
-the other two members can work against stable behavior immediately.
+**MVP priority:** Complete a reliable end-to-end workflow using mock devices before adding optional LLM functionality or attempting real device integrations.
 
-### Non-negotiable strategy
+## 1.2 Architecture Overview
 
--   Agree on the API contract on Day 1 and do not casually rename routes
-    or fields.
--   All members create stubs/mocks immediately; nobody waits for another
-    component to be finished.
--   Start with a **mock assistant**. Real Alexa/smart-speaker
-    integration is out of scope unless the mock flow is complete and
-    integration feasibility is confirmed.
--   The backend owns session state and enforces confirmation.
--   The model proposes text/options; it must not execute device actions.
--   Keep one deployable local demo path. Avoid optional features until
-    the core flow works.
--   Integrate every day, not only on Day 7.
-
-------------------------------------------------------------------------
-
-## 2. MVP acceptance criteria
-
-The project is considered demo-ready when all of the following work:
-
--   User can start a session.
--   UI displays suggested actions in a touch-friendly grid.
--   Selecting an action leads to task choices.
--   The user can select task details or answer a clarification.
--   A complete command is shown before execution.
--   The user must explicitly confirm.
--   The backend rejects execution if the command was not confirmed.
--   A mock assistant returns a success/failure result for supported
-    actions.
--   The UI displays the actual adapter result and supports cancel/retry.
--   LLM failure or missing credentials do not crash the demo;
-    deterministic fallback options are available.
--   Basic Urdu RTL mode renders without broken alignment or navigation.
--   Setup instructions work on a clean developer environment.
--   No API keys or participant data are committed.
-
-**Not required for the one-week MVP:** real Alexa device control, user
-accounts, persistent database, production deployment, a polished
-analytics dashboard, validated Urdu SUS/NPS instruments, or
-human-subject data collection.
-
-------------------------------------------------------------------------
-
-## 3. Architecture decision
-
-Use a small modular monolith for the backend. Do not split it into
-microservices during a one-week project.
-
-``` text
-┌─────────────────────────────────────────────┐
-│ Frontend: React + TypeScript (or existing UI)│
-│ Action grid · task choices · review · status │
-│ English/Urdu labels · RTL support            │
-└──────────────────────┬──────────────────────┘
-                       │ JSON over HTTP
-┌──────────────────────▼──────────────────────┐
-│ Flask API                                    │
-│ routes → schemas/validation → services       │
-│                                              │
-│ SessionService ── WorkflowService            │
-│                    │                         │
-│             LLMService / fallback             │
-│                    │                         │
-│             CommandService                   │
-│                    │                         │
-│             AssistantAdapter                 │
-└──────────────────────┬──────────────────────┘
-                       │
-            ┌──────────┴───────────┐
-            ▼                      ▼
-     LLM provider             Mock assistant
-     (server-side key)       (in-memory devices)
+```text
+┌─────────────────────────────────────────┐
+│          React + TypeScript             │
+│                                         │
+│ Touch UI | Task Selection | Review      │
+│ Urdu/English | RTL/LTR | Status         │
+└───────────────────┬─────────────────────┘
+                    │
+               HTTP / JSON
+                    │
+┌───────────────────▼─────────────────────┐
+│             Flask REST API              │
+│                                         │
+│ Routes                                  │
+│   ├── Session routes                    │
+│   ├── Workflow routes                   │
+│   └── Device routes                     │
+│                                         │
+│ Services                                │
+│   ├── Session Service                   │
+│   ├── Workflow Service                  │
+│   ├── Command Service                   │
+│   └── LLM Service (optional)            │
+│                                         │
+│ Adapter                                 │
+│   └── Mock Assistant / Devices          │
+└─────────────────────────────────────────┘
 ```
 
-### Suggested stack
+The frontend communicates only with the backend API. It must not call the LLM provider directly or execute device commands independently.
 
-Use the team's existing stack if one already exists. Otherwise:
+The backend owns session state, workflow transitions, command validation, confirmation enforcement, and simulated execution.
 
--   Frontend: React + TypeScript + Vite.
--   Backend: Python 3.11+ + Flask.
--   Validation: Pydantic if already familiar; otherwise simple explicit
-    validation functions.
--   AI: GPT-4o only if the team's API access supports it; otherwise use
-    a currently available compatible model behind the same adapter.
--   Tests: pytest for backend; frontend test tooling only if already
-    configured. Prioritize API smoke tests over adding a new test
-    framework late.
--   State: in-memory sessions for the demo.
--   Device execution: mock adapter with a small fixed device catalog.
--   Run locally with two terminals. Docker is optional, not a blocker.
+## 1.3 Technology Stack
 
-**Avoid a database, authentication system, queue, vector database, RAG,
-and multi-agent design.** None is necessary for the minimum interaction
-loop.
+| Component | Technology | Purpose |
+|---|---|---|
+| Frontend | React, TypeScript, Vite | Interactive touch interface |
+| Backend | Python, Flask | REST API and workflow orchestration |
+| API format | JSON over HTTP | Frontend/backend communication |
+| LLM | Optional provider-compatible API | Generate suggestions and clarification questions |
+| Device integration | Mock adapter | Simulate supported smart-home actions |
+| Testing | pytest | Backend and API contract tests |
+| Configuration | Environment variables | API keys and development settings |
 
-------------------------------------------------------------------------
+Use the existing repository configuration where available. Do not introduce a second frontend or backend framework.
 
-## 4. Three-way ownership
+## 1.4 Repository Structure
 
-### Workstream A --- Frontend and localization
-
-**Owner: Faraz Ansari**
-
-**Owns:** `frontend/`, frontend interaction states, styling, language
-labels, RTL behavior.
-
-Tasks: 1. Create the main page and session start action. 2. Build
-reusable `OptionGrid`, `ProgressIndicator`, `CommandReview`,
-`ExecutionStatus`, and `ErrorNotice` components. 3. Implement the
-stages: action → task → clarification (optional) → review → execution
-result. 4. Connect to the agreed API contract. 5. Add English/Urdu label
-dictionaries and a language toggle. 6. Set `dir="rtl"` for Urdu and
-check button order, alignment, punctuation, and mixed-script command
-text. 7. Add loading, timeout, retry, back, and cancel states. 8.
-Provide a frontend mock mode or fixture responses on Day 1 so UI work
-continues before backend integration. 9. Deliver a repeatable demo
-sequence and note any UI limitations.
-
-**Must not own:** LLM API calls, secrets, command authorization, device
-execution logic, or session truth.
-
-**Definition of done:** A user can complete the UI flow using the API or
-fixtures; the final command is clearly displayed; confirmation and
-result states are visible; Urdu RTL does not break the core screen.
-
-### Workstream B --- Backend, workflow, and LLM
-
-**Owner: Muhammad Ibrahim**
-
-**Owns:** `backend/`, API contract, session state, LLM integration,
-validation and confirmation enforcement.
-
-Tasks: 1. Create Flask app and health route. 2. Implement session
-creation and in-memory state. 3. Implement
-action/task/clarification/draft routes with deterministic fallback data
-first. 4. Add an `LLMProvider` adapter with one function per generation
-stage. 5. Validate model output against expected schemas and reject
-malformed options. 6. Implement command review and server-side
-confirmation. 7. Ensure execution cannot proceed unless the session
-contains a confirmed command. 8. Connect the command service to the
-`AssistantAdapter` interface provided by Workstream C. 9. Add timeouts,
-error responses, basic logs without secrets, and smoke tests. 10.
-Provide `.env.example`, actual setup commands, and sample API calls.
-
-**Must not own:** frontend layout, Urdu visual polish, or
-device-specific code inside route handlers.
-
-**Definition of done:** API works locally with fallback mode even
-without an API key; model integration can be enabled via environment
-configuration; invalid or unconfirmed commands are rejected.
-
-### Workstream C --- Mock assistant, integration, QA, and demo
-
-**Owner: Ashhal Aamir**
-
-**Owns:** device/action catalog, mock execution adapter, API contract
-test cases, integration test plan, demo script, project documentation.
-
-Tasks: 1. Define the initial device catalog, for example
-`living_room_light`, `bedroom_light`, `fan`, and `television`, with
-supported capabilities. 2. Define allowed actions and parameters for
-each device. 3. Implement `MockAssistantAdapter.execute(command)`
-returning a stable result shape. 4. Write example user journeys and
-expected command objects. 5. Create API smoke-test scripts or pytest
-tests against the agreed contract. 6. Test success, unsupported device,
-invalid action, missing confirmation, cancelled session, duplicate
-execution, timeout/failure, and model fallback cases. 7. Review whether
-the API contract is implemented consistently by frontend and backend. 8.
-Prepare a 2--3 minute demo script, sample scenarios, and a
-troubleshooting section. 9. Coordinate integration issues and maintain a
-shared `INTEGRATION.md` checklist. 10. Confirm the README does not claim
-the Urdu replication or participant study is complete.
-
-**Must not own:** model prompt architecture or frontend implementation.
-Provide interfaces and tests rather than building duplicate versions of
-the other members' modules.
-
-**Definition of done:** The mock adapter works independently, critical
-API rules have tests, the end-to-end scenario is repeatable, and
-documentation matches the actual build.
-
-### Shared responsibilities
-
--   Every member pulls and runs the integrated branch daily.
--   Each owner reviews changes that cross their module boundary.
--   All members agree before changing shared API field names.
--   One person merges PRs, but no component is integrated for the first
-    time on Day 7.
--   If the project already has a repository or stack, adapt this plan
-    rather than creating a competing structure.
-
-------------------------------------------------------------------------
-
-## 5. Fixed API contract
-
-Prefix all routes with `/api/v1`. JSON is the default request/response
-format. The backend owns the session state.
-
-### 5.1 Endpoints
-
-  ------------------------------------------------------------------------------------------------
-  Method                  Endpoint                                         Purpose
-  ----------------------- ------------------------------------------------ -----------------------
-  `GET`                   `/health`                                        Service health and mode
-
-  `GET`                   `/api/v1/devices`                                Return mock
-                                                                           environment/device
-                                                                           catalog
-
-  `POST`                  `/api/v1/sessions`                               Create session
-
-  `GET`                   `/api/v1/sessions/{session_id}`                  Read current session
-                                                                           state
-
-  `POST`                  `/api/v1/sessions/{session_id}/actions`          Generate action options
-
-  `POST`                  `/api/v1/sessions/{session_id}/tasks`            Generate task options
-                                                                           for selected action
-
-  `POST`                  `/api/v1/sessions/{session_id}/clarifications`   Submit answer or
-                                                                           request clarification
-                                                                           options
-
-  `POST`                  `/api/v1/sessions/{session_id}/command-draft`    Build a complete
-                                                                           command draft
-
-  `POST`                  `/api/v1/sessions/{session_id}/confirm`          Confirm the current
-                                                                           draft
-
-  `POST`                  `/api/v1/sessions/{session_id}/execute`          Execute the confirmed
-                                                                           command through the
-                                                                           adapter
-
-  `POST`                  `/api/v1/sessions/{session_id}/cancel`           Cancel the active
-                                                                           workflow
-
-  `DELETE`                `/api/v1/sessions/{session_id}`                  End session and clear
-                                                                           in-memory context
-  ------------------------------------------------------------------------------------------------
-
-Do not add separate endpoints for every tiny UI action. The list above
-is enough for the MVP.
-
-### 5.2 Common conventions
-
--   JSON field names use `snake_case`.
--   Every response includes `ok: true` on success.
--   Errors use `ok: false` and a stable error object.
--   Session IDs are opaque strings generated by the backend.
--   Use HTTP status codes meaningfully: `400` invalid input, `404`
-    unknown session/resource, `409` invalid workflow state or
-    unconfirmed command, `502` upstream LLM failure when no fallback is
-    possible, `500` unexpected server error.
--   Do not return stack traces or provider secrets to the frontend.
--   The frontend should not invent a session state if the server rejects
-    a transition.
-
-### 5.3 Create a session
-
-`POST /api/v1/sessions`
-
-Request:
-
-``` json
-{
-  "language": "en",
-  "environment_id": "demo_home"
-}
+```text
+project-root/
+├── frontend/
+│   ├── package.json
+│   ├── index.html
+│   └── src/
+│       ├── api/
+│       │   └── client.ts
+│       ├── components/
+│       ├── pages/
+│       ├── i18n/
+│       │   └── labels.ts
+│       ├── types/
+│       │   └── api.ts
+│       ├── App.tsx
+│       └── main.tsx
+├── backend/
+│   ├── app.py
+│   ├── requirements.txt
+│   ├── routes/
+│   │   ├── sessions.py
+│   │   ├── workflow.py
+│   │   └── devices.py
+│   ├── services/
+│   │   ├── session_service.py
+│   │   ├── workflow_service.py
+│   │   ├── command_service.py
+│   │   └── llm_service.py
+│   ├── adapters/
+│   │   └── assistant_mock.py
+│   └── tests/
+│       └── test_api.py
+├── docs/
+│   ├── architecture.md
+│   └── api-contract.md
+├── .env.example
+├── .gitignore
+├── README.md
+└── IMPLEMENTATION_PLAN.md
 ```
 
-Response:
+Keep modules focused on one responsibility. Add files only when needed rather than creating unnecessary abstractions.
 
-``` json
-{
-  "ok": true,
-  "session": {
-    "session_id": "generated-id",
-    "language": "en",
-    "stage": "action_selection",
-    "environment_id": "demo_home"
-  }
-}
+## 1.5 Module Responsibilities
+
+### Frontend
+
+- `App.tsx`: Main application layout and language/direction setup.
+- `pages/`: Main assistant workflow screen.
+- `components/`: Reusable action cards, task options, clarification prompts, command review, and status indicators.
+- `api/client.ts`: Centralized HTTP requests, error handling, and API base URL.
+- `i18n/labels.ts`: English and Urdu interface labels.
+- `types/api.ts`: Shared TypeScript interfaces for API requests and responses.
+
+The interface must support large touch targets, clear visual feedback, keyboard-accessible controls, and Urdu right-to-left layout.
+
+### Backend
+
+- `app.py`: Create the Flask application, register routes, and expose the health endpoint.
+- `routes/sessions.py`: Create, retrieve, and end sessions.
+- `routes/workflow.py`: Handle action selection, task selection, clarification, command drafting, confirmation, and execution.
+- `routes/devices.py`: Return the available mock devices and supported actions.
+- `services/session_service.py`: Manage session state and lifecycle.
+- `services/workflow_service.py`: Coordinate workflow stages and validate transitions.
+- `services/command_service.py`: Validate, confirm, and execute allowed commands.
+- `services/llm_service.py`: Optional LLM integration with deterministic fallback.
+- `adapters/assistant_mock.py`: Supply mock devices and simulate assistant/device responses.
+- `tests/test_api.py`: Verify API behavior, workflow progression, validation, and confirmation enforcement.
+
+## 1.6 API Contract
+
+All endpoints use the `/api/v1` prefix except `/health`.
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/health` | Check backend availability |
+| GET | `/api/v1/devices` | List available mock devices |
+| POST | `/api/v1/sessions` | Create a session |
+| GET | `/api/v1/sessions/{session_id}` | Retrieve session state |
+| POST | `/api/v1/sessions/{session_id}/actions` | Select an intended action |
+| POST | `/api/v1/sessions/{session_id}/tasks` | Select a task |
+| POST | `/api/v1/sessions/{session_id}/clarifications` | Submit clarification |
+| POST | `/api/v1/sessions/{session_id}/command-draft` | Generate a command proposal |
+| POST | `/api/v1/sessions/{session_id}/confirm` | Confirm the proposed command |
+| POST | `/api/v1/sessions/{session_id}/execute` | Execute a confirmed command |
+| POST | `/api/v1/sessions/{session_id}/cancel` | Cancel the current workflow |
+| DELETE | `/api/v1/sessions/{session_id}` | End a session |
+
+Request and response schemas must be documented in `docs/api-contract.md` before parallel implementation begins.
+
+### Contract conventions
+
+- JSON fields use `snake_case`.
+- Session IDs are generated by the backend.
+- The backend is the source of truth for workflow state.
+- Every error response should contain a stable error code and a readable message.
+- Invalid workflow transitions must return an appropriate 4xx response.
+- An execution result must clearly identify simulated execution using `"simulated": true`.
+
+### Session stages
+
+```text
+action_selection
+      ↓
+task_selection
+      ↓
+clarification (if required)
+      ↓
+review
+      ↓
+ready_to_execute
+      ↓
+executing
+      ↓
+completed
 ```
 
-Supported `language` values for the first version: `en`, `ur`.
+Cancellation and errors must be handled explicitly. A session must not skip required workflow stages.
 
-### 5.4 Generate action options
+### Command schema
 
-`POST /api/v1/sessions/{session_id}/actions`
-
-Request:
-
-``` json
-{}
-```
-
-Response:
-
-``` json
-{
-  "ok": true,
-  "stage": "action_selection",
-  "options": [
-    {"id": "turn_on", "label": "Turn on", "value": "turn_on"},
-    {"id": "turn_off", "label": "Turn off", "value": "turn_off"},
-    {"id": "set_level", "label": "Set level", "value": "set_level"}
-  ]
-}
-```
-
-These options are examples. The backend may return up to eight action
-choices plus navigation controls handled by the UI.
-
-### 5.5 Generate task options
-
-`POST /api/v1/sessions/{session_id}/tasks`
-
-Request:
-
-``` json
-{
-  "action": "turn_on"
-}
-```
-
-Response:
-
-``` json
-{
-  "ok": true,
-  "stage": "task_selection",
-  "options": [
-    {"id": "living_room_light", "label": "Living room light", "value": "living_room_light"},
-    {"id": "bedroom_light", "label": "Bedroom light", "value": "bedroom_light"}
-  ]
-}
-```
-
-The server validates that `action` is supported. Task options must
-reference devices in the configured catalog.
-
-### 5.6 Clarification
-
-`POST /api/v1/sessions/{session_id}/clarifications`
-
-Request to submit an answer:
-
-``` json
-{
-  "question_id": "brightness",
-  "answer": "70"
-}
-```
-
-Response:
-
-``` json
-{
-  "ok": true,
-  "stage": "review",
-  "message": "Details saved"
-}
-```
-
-For MVP speed, clarification may be deterministic: ask for a missing
-value only when the selected action requires it. Avoid an elaborate
-multi-turn planner unless time permits.
-
-### 5.7 Create command draft
-
-`POST /api/v1/sessions/{session_id}/command-draft`
-
-Request:
-
-``` json
-{}
-```
-
-Response:
-
-``` json
-{
-  "ok": true,
-  "stage": "review",
-  "command": {
-    "device_id": "living_room_light",
-    "action": "turn_on",
-    "parameters": {}
-  },
-  "display_text": "Turn on the living room light",
-  "confirmed": false
-}
-```
-
-`display_text` is for review only. Execution must use the structured
-`command` object, not parse arbitrary natural-language text.
-
-### 5.8 Confirm
-
-`POST /api/v1/sessions/{session_id}/confirm`
-
-Request:
-
-``` json
-{
-  "confirmed": true
-}
-```
-
-Response:
-
-``` json
-{
-  "ok": true,
-  "stage": "ready_to_execute",
-  "confirmed": true
-}
-```
-
-Reject confirmation if no current draft exists. `confirmed: false`
-should cancel or return to review rather than authorize execution.
-
-### 5.9 Execute command
-
-`POST /api/v1/sessions/{session_id}/execute`
-
-Request:
-
-``` json
-{}
-```
-
-Response:
-
-``` json
-{
-  "ok": true,
-  "stage": "completed",
-  "result": {
-    "status": "success",
-    "message": "Living room light turned on",
-    "simulated": true
-  }
-}
-```
-
-Return `409` if the command is not confirmed. The mock adapter should
-return `simulated: true` so nobody mistakes a simulation for real device
-control.
-
-### 5.10 Error response
-
-``` json
-{
-  "ok": false,
-  "error": {
-    "code": "COMMAND_NOT_CONFIRMED",
-    "message": "Confirm the command before execution."
-  }
-}
-```
-
-Suggested stable error codes: - `INVALID_REQUEST` -
-`SESSION_NOT_FOUND` - `INVALID_STAGE` - `UNSUPPORTED_ACTION` -
-`UNSUPPORTED_DEVICE` - `COMMAND_NOT_CONFIRMED` - `LLM_UNAVAILABLE` -
-`LLM_INVALID_OUTPUT` - `EXECUTION_FAILED`
-
-### 5.11 Contract freeze
-
-On Day 1, the three owners should agree on: - Endpoint paths and HTTP
-methods. - Request and response keys. - Session stages and allowed
-transitions. - Device/action IDs. - Error shape. - The exact `command`
-object.
-
-After this, changes require a quick team agreement and simultaneous
-updates to tests, backend, and frontend.
-
-------------------------------------------------------------------------
-
-## 6. Shared data model
-
-Use one simple session object. In-memory storage is acceptable for a
-local demo; sessions will be lost on restart.
-
-``` python
-session = {
-    "session_id": "...",
-    "language": "en",
-    "environment_id": "demo_home",
-    "stage": "action_selection",
-    "selected_action": None,
-    "selected_device_id": None,
-    "parameters": {},
-    "command_draft": None,
-    "confirmed": False,
-    "executed": False,
-    "history": []
-}
-```
-
-Use stable stage names:
-
--   `action_selection`
--   `task_selection`
--   `clarification`
--   `review`
--   `ready_to_execute`
--   `executing`
--   `completed`
--   `cancelled`
--   `error`
-
-Keep the stage transitions in one backend workflow module, not scattered
-through route handlers.
-
-### Command object
-
-``` json
+```json
 {
   "device_id": "living_room_light",
   "action": "turn_on",
@@ -561,350 +200,231 @@ through route handlers.
 }
 ```
 
-For a brightness example:
-
-``` json
-{
-  "device_id": "living_room_light",
-  "action": "set_brightness",
-  "parameters": {"level": 70}
-}
-```
-
-The backend must validate device/action compatibility and parameter
-ranges. The model cannot introduce arbitrary devices, actions, or
-parameter names.
-
-------------------------------------------------------------------------
-
-## 7. Suggested repository layout
-
-Adapt to the existing repository instead of restructuring needlessly.
-
-``` text
-project-root/
-├── README.md
-├── INTEGRATION.md
-├── .env.example
-├── .gitignore
-├── frontend/
-│   ├── src/
-│   │   ├── api/client.ts
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── i18n/labels.ts
-│   │   ├── types/api.ts
-│   │   └── App.tsx
-│   └── package.json
-├── backend/
-│   ├── app.py
-│   ├── routes/
-│   │   ├── health.py
-│   │   ├── sessions.py
-│   │   └── workflow.py
-│   ├── schemas.py
-│   ├── services/
-│   │   ├── session_service.py
-│   │   ├── workflow_service.py
-│   │   ├── llm_service.py
-│   │   └── command_service.py
-│   ├── adapters/
-│   │   └── assistant_mock.py
-│   ├── config.py
-│   ├── requirements.txt
-│   └── tests/
-└── docs/
-    ├── architecture.md
-    ├── api-contract.md
-    └── demo-script.md
-```
-
-This is a proposal, not a claim about files that currently exist.
-
-------------------------------------------------------------------------
-
-## 8. Seven-day parallel schedule
-
-### Day 1 --- Contract and independent stubs
-
-**All members together, first 60--90 minutes** - Agree on the MVP and
-the exact API contract above. - Confirm repo structure, ports, local
-commands, stage names, and device catalog. - Create GitHub issues and a
-shared integration branch. - Create `.env.example` and a no-secrets
-`.gitignore`.
-
-**Faraz** - Create UI skeleton and API client with mocked responses. -
-Implement the action grid and stage navigation.
-
-**Muhammad** - Create Flask app, `/health`, session creation, in-memory
-session store. - Implement route stubs with the agreed response shapes.
-
-**Ashhal** - Implement mock assistant adapter and device catalog. -
-Create API smoke-test collection and `INTEGRATION.md`.
-
-**End-of-day gate:** each component starts independently; API shapes
-match; no member is blocked by another.
-
-### Day 2 --- Complete the deterministic end-to-end flow
-
-**Faraz** - Connect session creation, action options, task options,
-draft review, and result screen to the API client or fixtures. - Add
-loading/error/back/cancel states.
-
-**Muhammad** - Implement deterministic action/task generation and
-workflow transitions. - Implement command draft and confirmation
-enforcement.
-
-**Ashhal** - Implement mock execution and success/failure results. -
-Test unsupported actions, missing session, invalid stage, and
-unconfirmed execution.
-
-**End-of-day gate:** a complete command can be constructed and executed
-in mock mode without an LLM.
-
-### Day 3 --- LLM integration and contract tests
+The backend must validate device IDs, supported actions, parameters, and the current session stage.
 
-**Faraz** - Connect the live API and remove any duplicate frontend
-business logic. - Ensure UI follows backend-returned stage and errors.
+**Critical safety rule:** Drafting a command must never execute it. Execution is permitted only after explicit confirmation of the current command. Reject unconfirmed execution with HTTP `409` and error code `COMMAND_NOT_CONFIRMED`.
 
-**Muhammad** - Implement LLM adapter, prompt templates, schema
-validation, timeout, and fallback behavior. - Keep deterministic
-fallback enabled by default when credentials are absent.
+If a command changes after confirmation, its confirmation must be invalidated.
 
-**Ashhal** - Run contract tests against the real backend. - Add
-regression cases for invalid model output, repeated execute requests,
-and session isolation.
+## 1.7 LLM and Mock Device Strategy
 
-**End-of-day gate:** the LLM can improve suggestions, but the demo still
-works if the provider fails.
+The application must work without an API key.
 
-### Day 4 --- Urdu/RTL and interaction completion
+Implement deterministic suggestions and clarification rules first. The LLM service may later replace or improve suggestion generation without changing the API contract.
 
-**Faraz** - Add Urdu labels, language switch, RTL layout, and
-mixed-script checks.
+The LLM may:
 
-**Muhammad** - Localize prompt instructions and labels returned by the
-backend. - Ensure model language output does not change IDs or command
-schema.
+- Suggest likely user intentions.
+- Generate task options.
+- Ask clarification questions.
+- Help interpret supported natural-language requests.
 
-**Ashhal** - Test Urdu API responses and rendered UI; report text,
-device, or TTS limitations. - Verify the README distinguishes proposed
-research from completed implementation.
+The LLM must not execute commands directly, bypass validation, or mark commands as confirmed.
 
-**End-of-day gate:** the core workflow works in English and a basic Urdu
-UI mode.
+The mock adapter should initially support a small, predictable set of devices and actions, such as turning a light on or off and setting a thermostat temperature. Unsupported actions must return a controlled error.
 
-### Day 5 --- Integration hardening
+No real smart-home device integration is required for the MVP.
 
-**Faraz** - Fix layout, keyboard/touch interaction, navigation, and
-error display.
+## 1.8 Urdu and Accessibility Requirements
 
-**Muhammad** - Fix state bugs, validation, server-side confirmation,
-configuration, and exception handling.
+- Provide Urdu and English interface labels.
+- Switch document direction between RTL for Urdu and LTR for English.
+- Use appropriate Urdu text rendering and alignment.
+- Present tasks and actions as clear selectable visual controls.
+- Make clarification questions understandable and easy to answer.
+- Show the proposed command before execution.
+- Provide visible success, failure, loading, and cancellation states.
+- Do not depend on sound alone to communicate important information.
+- Keep text-to-speech or voice output optional; it is not a prerequisite for the touch-interface MVP.
 
-**Ashhal** - Run regression checklist; test timeouts, cancellation,
-duplicate execution, and mock adapter failures. - Measure model response
-and total interaction latency.
+---
 
-**End-of-day gate:** no known blocker in the core demo; all critical
-safety/state tests pass.
+# Part 2 — Team Responsibilities
 
-### Day 6 --- Freeze and rehearse
+Each member owns implementation deliverables, not just documentation. All members must use the agreed API contract and integrate through the shared `dev` branch.
 
-**All members** - Feature freeze. Only bug fixes and essential
-documentation changes. - Clone into a clean directory or machine and
-follow setup instructions. - Run the demo sequence several times with
-and without an API key. - Verify no secrets, personal data, or raw
-participant data are committed.
+## 2.1 Muhammad Ibrahim — Backend and Workflow
 
-**End-of-day gate:** another teammate can start the system and reproduce
-the demo using the README.
+**Primary ownership:** Backend orchestration, session lifecycle, and command safety.
 
-### Day 7 --- Final delivery
+Deliverables:
 
--   Fix only release-blocking bugs.
--   Tag a release or commit hash.
--   Record a short backup demo video if useful.
--   Finalize architecture, API, limitations, and future-work
-    documentation.
--   Demonstrate the same preselected scenario reliably.
+1. Implement the Flask application and route registration.
+2. Implement session creation, retrieval, and lifecycle management.
+3. Implement workflow transitions and request validation.
+4. Implement command drafting, confirmation, cancellation, and execution enforcement.
+5. Add the optional LLM service behind a stable interface.
+6. Ensure the deterministic fallback works without credentials.
+7. Review backend tests and resolve integration defects.
 
-Do not begin real-device integration on Day 7 unless it already works
-and does not risk the core demo.
+**Definition of done:** The backend supports the documented workflow, rejects invalid transitions, and cannot execute an unconfirmed command.
 
-------------------------------------------------------------------------
+## 2.2 Faraz Ansari — Frontend and Urdu Interface
 
-## 9. Integration rules
+**Primary ownership:** Touch interface, API integration, and bilingual presentation.
 
-1.  **Single contract owner:** Muhammad maintains
-    `docs/api-contract.md`; all three can propose changes, but update
-    the document before changing code.
-2.  **Mock first:** frontend fixtures and backend fallback responses
-    must match the same schema.
-3.  **Small PRs:** one issue per focused PR where practical.
-4.  **Daily integration:** merge and test the integrated branch every
-    day.
-5.  **No silent API changes:** a field or route rename requires updates
-    to frontend types, backend schemas, and contract tests.
-6.  **Separate provider code:** only `llm_service.py` should know the
-    LLM SDK specifics.
-7.  **Separate device code:** routes call `command_service`, which calls
-    an adapter; routes do not operate devices directly.
-8.  **Secrets stay server-side:** only the backend reads the model API
-    key.
-9.  **No false success:** display execution success only when the
-    adapter returns success.
-10. **Keep a fallback:** deterministic options and mock execution must
-    remain available for the demo.
+Deliverables:
 
-### Daily 15-minute sync
+1. Implement the main assistant screen.
+2. Build reusable action, task, clarification, review, and status components.
+3. Connect the interface to the backend through `client.ts`.
+4. Define and use TypeScript API interfaces.
+5. Implement Urdu/English switching and RTL/LTR layout.
+6. Display backend validation errors and workflow state clearly.
+7. Test the full interface against the deterministic backend.
 
-Each member reports: - What is working now? - What is blocking
-integration? - Which contract or file will change today? - What is the
-end-of-day acceptance test?
+**Definition of done:** A user can complete the workflow through the touch interface, review the proposed command, explicitly confirm it, and see the result.
 
-------------------------------------------------------------------------
+## 2.3 Ashhal Aamir — Mock Adapter, Testing, and Integration
 
-## 10. Demo scenario
+**Primary ownership:** Predictable device simulation, independent verification, and demo readiness.
 
-Use one predictable scenario:
+Deliverables:
 
-**"Turn on the living room light."**
+1. Implement the mock device catalog and supported action definitions.
+2. Implement the mock assistant/device adapter.
+3. Create API and workflow tests, including negative cases.
+4. Test invalid device/action combinations and unconfirmed execution.
+5. Verify frontend/backend integration using the agreed contract.
+6. Prepare reproducible setup instructions and a short demo script.
+7. Run clean-start and end-to-end checks and report defects.
 
-1.  Start session in English.
-2.  Select "Turn on."
-3.  Select "Living room light."
-4.  Review the command.
-5.  Confirm.
-6.  Mock assistant returns success.
-7.  Show the same basic workflow in Urdu.
-8.  Optionally demonstrate a missing-detail clarification or a failed
-    LLM request falling back safely.
+**Definition of done:** The prototype can be started from documented instructions, its simulated actions behave consistently, and its critical workflow and safety rules are covered by tests.
 
-The demo should visibly label mock execution as simulated. If a model
-API key is unavailable or network access fails, switch to deterministic
-fallback mode instead of improvising during the presentation.
+## 2.4 Collaboration Rules
 
-------------------------------------------------------------------------
+- Agree on `docs/api-contract.md` before developing dependent features in parallel.
+- Keep changes within each member's owned modules where possible.
+- Communicate any API schema change before implementing it.
+- Use feature branches for independent work and merge through pull requests into `dev`.
+- Avoid committing `.env` files containing secrets.
+- Every merged feature must be runnable and include relevant tests.
+- Integrate small changes frequently instead of merging all work at the end.
 
-## 11. Environment and configuration
+---
 
-Use backend environment variables; do not hardcode credentials.
+# Part 3 — Seven-Day Implementation Schedule
 
-Example `.env.example`:
+## Day 1 — Foundation and Contract
 
-``` dotenv
-FLASK_ENV=development
-PORT=5000
-LLM_API_KEY=
-LLM_MODEL=
-LLM_ENABLED=false
-FRONTEND_ORIGIN=http://localhost:5173
-```
+**Goal:** Everyone can develop against the same architecture.
 
-These are proposed names. Match them to the implementation. Keep
-`LLM_ENABLED=false` or a fallback mode available so the app starts
-without credentials.
+- Muhammad: Initialize Flask, health endpoint, and basic route registration.
+- Faraz: Verify frontend setup and create the application shell.
+- Ashhal: Implement the initial mock device catalog and agree on test scenarios.
+- All: Finalize API request/response schemas, session stages, and error conventions.
 
-Local development target: - Frontend: `http://localhost:5173` - Backend:
-`http://localhost:5000` - Health check:
-`GET http://localhost:5000/health`
+**Milestone:** Frontend and backend start independently; API contract is agreed upon.
 
-Use a development CORS configuration restricted to the frontend origin.
-Do not expose the backend to the public internet merely to make local
-integration work.
+## Day 2 — Deterministic End-to-End Workflow
 
-------------------------------------------------------------------------
+- Muhammad: Implement sessions and workflow transitions.
+- Faraz: Implement action/task selection and connect the initial API calls.
+- Ashhal: Implement mock execution and test the main workflow.
 
-## 12. Test checklist
+**Milestone:** A user can select a task, generate a deterministic command, confirm it, and simulate execution.
 
-### Critical tests --- must pass
+## Day 3 — Clarification and Safety
 
--   [ ] Health endpoint responds.
--   [ ] Session can be created and retrieved.
--   [ ] Action and task options match the contract.
--   [ ] Invalid action/device is rejected.
--   [ ] Draft displays a structured command and `confirmed: false`.
--   [ ] Execution before confirmation returns
-    `409 COMMAND_NOT_CONFIRMED`.
--   [ ] Execution after confirmation returns an explicit mock result.
--   [ ] LLM unavailable or malformed output triggers fallback/error
-    recovery.
--   [ ] Cancelled session cannot execute a command.
--   [ ] One session's context does not leak into another session.
--   [ ] UI displays failure rather than falsely showing success.
--   [ ] Urdu RTL mode renders the main workflow.
--   [ ] Clean setup works using documented commands.
+- Muhammad: Implement clarification handling, command validation, and confirmation enforcement.
+- Faraz: Add clarification UI, command review, and cancellation states.
+- Ashhal: Add positive and negative API tests.
 
-### Nice-to-have if time remains
+**Milestone:** Required clarification works, invalid commands are rejected, and unconfirmed execution is impossible through the API.
 
--   [ ] Keyboard-only navigation.
--   [ ] Persisted session history.
--   [ ] Real TTS playback.
--   [ ] Real smart-speaker integration.
--   [ ] More elaborate model-generated clarification.
--   [ ] Formal user study.
+## Day 4 — Urdu and Optional LLM Integration
 
-------------------------------------------------------------------------
+- Muhammad: Add the optional LLM provider behind the existing service interface.
+- Faraz: Implement Urdu labels, language switching, and RTL layout.
+- Ashhal: Test deterministic fallback behavior, mock responses, and representative Urdu workflows.
 
-## 13. Risks and cuts
+**Milestone:** The core workflow works in both languages, whether or not an LLM API key is configured.
 
-  -----------------------------------------------------------------------
-  Risk                                Immediate response
-  ----------------------------------- -----------------------------------
-  LLM API key or quota unavailable    Use deterministic fallback and mock
-                                      execution
+## Day 5 — Integration and Error Handling
 
-  Frontend/backend integration drifts Freeze API contract and run smoke
-                                      tests daily
+- Muhammad: Resolve backend defects and stabilize error responses.
+- Faraz: Handle loading, network errors, invalid responses, and completed states.
+- Ashhal: Run integrated tests and verify session isolation and command safety.
 
-  Urdu TTS is unsupported             Deliver Urdu text/RTL UI; document
-                                      TTS limitation
+**Milestone:** No known critical defect in the main workflow.
 
-  Real assistant integration is       Keep mock adapter; do not block
-  blocked                             delivery
+## Day 6 — Feature Freeze and Rehearsal
 
-  Too many features for seven days    Cut persistence, login, deployment,
-                                      and optional screens
+- All: Freeze new features.
+- Muhammad: Verify backend setup and confirmation enforcement.
+- Faraz: Test the interface at presentation/demo size and verify RTL behavior.
+- Ashhal: Verify clean setup, run the full test suite, and prepare demo steps.
 
-  Model generates invalid or unsafe   Validate structured output and
-  commands                            allow-listed device/action pairs
+**Milestone:** The prototype runs from documented setup instructions without relying on developer-specific configuration.
 
-  Last-day merge breaks the demo      Freeze features on Day 6 and keep a
-                                      known-good commit
-  -----------------------------------------------------------------------
+## Day 7 — Final Verification and Presentation
 
-### Explicitly out of scope for this week
+- Run the full workflow from a clean start.
+- Verify the no-API-key fallback.
+- Demonstrate Urdu/English interface behavior.
+- Verify command review, explicit confirmation, simulated execution, and cancellation.
+- Fix only critical defects and prepare the final demonstration.
 
--   Full production deployment and monitoring.
--   Multi-user authentication and role management.
--   Database-backed persistence.
--   Real device control unless trivial and verified.
--   Collecting participant data without required approval.
--   Claiming Urdu SUS/NPS/Adjective Scale validation without the
-    appropriate process.
--   Claiming that the Pakistani replication has results before
-    conducting it.
+**Milestone:** A stable, reproducible prototype ready for evaluation.
 
-------------------------------------------------------------------------
+---
 
-## 14. Final definition of done
+# Part 4 — Acceptance Criteria
 
-At the deadline, the team should be able to show, from a clean start:
+The MVP is complete when all the following conditions are satisfied:
 
-1.  The app launches using documented commands.
-2.  The user completes the action/task/review flow.
-3.  The LLM provides suggestions when enabled; fallback works when it is
-    not.
-4.  The command is visible and requires explicit confirmation.
-5.  The mock adapter executes only allowed, confirmed commands.
-6.  The result is accurately reported.
-7.  The basic Urdu/RTL UI is demonstrable.
-8.  Critical API and workflow tests pass.
-9.  The repository documents setup, architecture, API contract,
-    limitations, and the proposed---not completed---research work.
+- [ ] Frontend and backend start using documented commands.
+- [ ] The backend health endpoint responds successfully.
+- [ ] A session can be created and retrieved.
+- [ ] A user can select an action and task.
+- [ ] Clarification is supported when needed.
+- [ ] A proposed command is displayed before execution.
+- [ ] The user must explicitly confirm the current command.
+- [ ] Unconfirmed and invalid commands are rejected by the backend.
+- [ ] Successful mock execution is reported as simulated.
+- [ ] Cancellation and error states are handled.
+- [ ] Urdu RTL and English LTR layouts work.
+- [ ] The prototype runs without LLM credentials.
+- [ ] Tests cover the core workflow and critical negative cases.
+- [ ] Setup instructions and a repeatable demo script are available.
 
-**Priority order:** deterministic end-to-end workflow → API contract
-stability → LLM suggestions → confirmation and error handling → Urdu/RTL
-→ optional TTS/device integration. This order maximizes the chance of a
-complete demo within one week.
+# Part 5 — Scope and Priorities
+
+## Must have
+
+- Working React/Flask integration.
+- Session and workflow management.
+- Touch-based task selection.
+- Clarification and command review.
+- Explicit confirmation and simulated execution.
+- Urdu/English support.
+- Deterministic fallback and essential tests.
+
+## Should have
+
+- Optional LLM-generated task suggestions.
+- Improved Urdu phrasing and error messages.
+- Stronger test coverage and polished demo flow.
+
+## Out of scope for the first week
+
+- Real smart-home device control.
+- Real Alexa integration.
+- User accounts and production authentication.
+- Persistent database storage.
+- Production deployment and scalability.
+- Claims that the Urdu replication study has already been conducted.
+
+These features can be considered after the core prototype is stable.
+
+---
+
+# Part 6 — Development Principles
+
+1. **Contract first:** Define interfaces before parallel implementation.
+2. **Mock first:** Make the complete workflow work without external services.
+3. **Safety first:** Enforce confirmation and command validation on the backend.
+4. **Modular design:** Keep routes, workflow logic, command validation, and adapters separate.
+5. **Accessible by design:** Treat Urdu/RTL and visual feedback as core requirements.
+6. **Test continuously:** Validate each integration milestone instead of waiting until Day 7.
+7. **Freeze early:** Reserve the final two days for stabilization, setup verification, and demonstration.
