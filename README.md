@@ -4,11 +4,11 @@
 
 ## Overview
 
-This project builds a Gradio web app that simulates a smart home assistant interface. It uses an LLM (via Groq API) to generate context-aware command suggestions in Urdu, helping Deaf and Hard of Hearing (DHH) users interact with a simulated smart home environment without relying on voice input.
+This project builds a Gradio web app that simulates a smart home assistant interface for Pakistani Urdu-speaking Deaf and Hard of Hearing (DHH) users. The current UI uses hardcoded bilingual suggestions and a simulated home; the repository also includes a Groq client for future LLM integration.
 
 ### What This Project Is
 
-- **LLM-assisted touch interface** — Users select from LLM-generated Urdu command options instead of typing or speaking.
+- **Bilingual touch interface** — Users select Urdu + English command options instead of typing or speaking; the current Gradio UI uses hardcoded fixtures.
 - **Simulated smart home** — Light state, timer, calendar, weather, and recipe are tracked in-app; no real IoT hardware required.
 - **Culturally localized tasks** — Lahore weather, tea timer, biryani recipe, Fajr reminder.
 - **Bilingual questionnaires** — SUS, Adjective Scale, and NPS in Urdu + English.
@@ -23,7 +23,16 @@ This project builds a Gradio web app that simulates a smart home assistant inter
 
 ## Quick Start
 
-### 1. Clone & Enter
+### Run the Gradio study app
 
-```bash
-git clone <your-repo-url>
+Install the dependencies and start the app from the repository root:
+
+```powershell
+python -m pip install -r requirements.txt
+python -m app.main
+```
+
+Open the local URL printed by Gradio. The current study UI uses hardcoded
+bilingual action and task options and updates only the in-memory simulated
+home. Replace `get_llm_options(verb, history)` in `app/main.py` when connecting
+an LLM to the interface.

@@ -23,43 +23,50 @@ def get_state():
     return deepcopy(state)
 
 
-def update_state(command):
-    """Apply a recognized English or Urdu command and return a state copy.
-
-    Unknown commands leave the simulator unchanged. This intentionally remains
-    a deterministic demo; weather/recipe values are simulated, not live data.
-    """
+def _apply_command(home_state, command):
     text = str(command or "").strip().lower()
     text = text.translate(str.maketrans("۰۱۲۳۴۵۶۷۸۹", "0123456789"))
     normalized = re.sub(r"\s+", " ", text)
     if any(x in normalized for x in ("turn on light", "light on", "بتی جل", "لائٹ آن")):
-        state["light"] = "on"
+        home_state["light"] = "on"
     elif any(x in normalized for x in ("turn off light", "light off", "بتی بند", "لائٹ آف")):
-        state["light"] = "off"
+        home_state["light"] = "off"
     color = next((c for c in ("blue", "red", "green", "white") if c in normalized), None)
     urdu_colors = {"نیلا": "blue", "سرخ": "red", "سبز": "green", "سفید": "white"}
     if color or any(c in normalized for c in urdu_colors):
-        state["light_color"] = color or next(v for k, v in urdu_colors.items() if k in normalized)
-        state["light"] = "on"
+        home_state["light_color"] = color or next(v for k, v in urdu_colors.items() if k in normalized)
+        home_state["light"] = "on"
     timer_match = re.search(r"(\d+)\s*(?:minutes?|mins?|منٹ)", normalized)
     if timer_match and ("timer" in normalized or "ٹائمر" in normalized):
-        state["timer"] = f"{timer_match.group(1)} minutes"
+        home_state["timer"] = f"{timer_match.group(1)} minutes"
     elif "ٹائمر" in normalized and "پانچ" in normalized:
-        state["timer"] = "5 minutes"
+        home_state["timer"] = "5 minutes"
     elif "ٹائمر" in normalized and "دس" in normalized:
-        state["timer"] = "10 minutes"
+        home_state["timer"] = "10 minutes"
     if "weather" in normalized or "موسم" in normalized:
-        state["weather"] = "Lahore: Sunny, 28°C (simulated)"
+        home_state["weather"] = "Lahore: Sunny, 28°C (simulated)"
     if "biryani" in normalized or "بریانی" in normalized:
-        state["recipe"] = "Biryani recipe displayed"
+        home_state["recipe"] = "Biryani recipe displayed"
     if "fajr" in normalized or "فجر" in normalized:
-        state["reminder"] = "Fajr"
+        home_state["reminder"] = "Fajr"
     if "calendar" in normalized or "کیلنڈر" in normalized:
-        state["calendar"] = "No events today"
+        home_state["calendar"] = "No events today"
+    return home_state
+
+
+def update_state(command):
+    """Apply a recognized command to the simulator and return a state copy."""
+    _apply_command(state, command)
     return get_state()
 
 
-def get_state_display():
+def preview_state(command):
+    """Return the state that a command would produce without changing the simulator."""
+    return _apply_command(get_state(), command)
+
+
+def get_state_display(home_state=None):
     """Return a compact bilingual display string for the Gradio state panel."""
     labels = {"light": "Light / بتی", "light_color": "Color / رنگ", "timer": "Timer / ٹائمر", "reminder": "Reminder / یاد دہانی", "calendar": "Calendar / کیلنڈر", "weather": "Weather / موسم", "recipe": "Recipe / ترکیب"}
-    return "\n".join(f"{labels[key]}: {value if value is not None else 'None'}" for key, value in state.items())
+    display_state = state if home_state is None else home_state
+    return "\n".join(f"{labels[key]}: {value if value is not None else 'None'}" for key, value in display_state.items())
