@@ -52,7 +52,7 @@ def _home_text(home_env):
     return json.dumps(home_env, ensure_ascii=False, default=str)
 
 
-def _complete(template, fallback, **values):
+def _complete(template, fallback, *, json_mode=False, **values):
     """Call Groq, returning parsed content or fallback on any service issue."""
     global LAST_ERROR, LAST_RAW_RESPONSE, LAST_PARSE_USED_FALLBACK
     LAST_ERROR = None
@@ -61,12 +61,25 @@ def _complete(template, fallback, **values):
     prompt = template.format(**values)
     started = time.perf_counter()
     try:
-        response = _get_client().chat.completions.create(
+        client = _get_client()  # Loads .env before model selection.
+        model = os.getenv("GROQ_MODEL", MODEL)
+        # GPT-OSS spends part of its completion budget on reasoning. Keep that
+        # effort low and exclude reasoning from the user-facing command output.
+        request_options = {
+            "max_completion_tokens": 512,
+        }
+        if model.startswith("openai/gpt-oss-"):
+            request_options.update({"reasoning_effort": "low", "include_reasoning": False})
+        if json_mode:
+            request_options["response_format"] = {"type": "json_object"}
+        response = client.chat.completions.create(
             # Read after _get_client loads .env so a chosen model there takes effect.
-            model=os.getenv("GROQ_MODEL", MODEL),
-            messages=[{"role": "system", "content": prompts.SYSTEM_PROMPT}, {"role": "user", "content": prompt}],
+            model=model,
+            # Groq's GPT-OSS guidance recommends putting instructions in the
+            # user message instead of relying on a system message.
+            messages=[{"role": "user", "content": f"{prompts.SYSTEM_PROMPT}\n\n{prompt}"}],
             temperature=0.2,
-            max_tokens=350,
+            **request_options,
         )
         content = response.choices[0].message.content or ""
         LAST_RAW_RESPONSE = content.strip()
@@ -81,7 +94,7 @@ def get_backend_status():
     return {
         "used_fallback": LAST_ERROR is not None,
         "error": LAST_ERROR,
-        "used_local_list_fallback": LAST_PARSE_USED_FALLBACK,
+        "used_local_list_fallback": LAST_PARSE_USED_FALLBACK or LAST_ERROR is not None,
         "raw_response_preview": (LAST_RAW_RESPONSE or "")[:500],
     }
 
@@ -94,16 +107,31 @@ def _parse_list(content, fallback, limit=8):
         if not isinstance(values, list):
             raise ValueError("not a JSON list")
     except (ValueError, json.JSONDecodeError, TypeError):
-        values = [line.strip(" -•\t\"'") for line in content.splitlines() if line.strip()]
+        # A truncated JSON array can still contain complete quoted options.
+        # Recover those before falling back to the hardcoded list.
+        values = []
+        for quoted in re.findall(r'"((?:\\.|[^"\\])*)"', content):
+            try:
+                values.append(json.loads(f'"{quoted}"'))
+            except json.JSONDecodeError:
+                continue
+        if not values:
+            values = [line.strip(" -•\t\"'") for line in content.splitlines() if line.strip()]
     cleaned = []
     for item in values:
         if isinstance(item, str) and item.strip() and item.strip() not in cleaned:
             cleaned.append(item.strip())
-    LAST_PARSE_USED_FALLBACK = len(cleaned) < limit
-    return (cleaned + list(fallback))[:limit]
+    # Preserve a shorter valid answer rather than adding unrelated generic
+    # buttons. The hardcoded list is used only when no options were recoverable.
+    LAST_PARSE_USED_FALLBACK = not cleaned
+    if not cleaned:
+        cleaned = list(fallback)
+    return cleaned[:limit]
 
 
 def _list_call(template, fallback, **values):
+    # List prompts intentionally return a top-level JSON array. Groq's
+    # json_object mode rejects arrays, so parse the model's JSON directly.
     raw, _ = _complete(template, json.dumps(fallback, ensure_ascii=False), **values)
     return _parse_list(raw, fallback)
 
@@ -127,7 +155,7 @@ def get_llm_options(verb, history=None, home_env=None):
 
 def needs_more_info(task):
     raw, _ = _complete(prompts.NEEDS_MORE_INFO_PROMPT, '{"needs_more_info": false}',
-                       task=task, home_env=_home_text(None))
+                       json_mode=True, task=task, home_env=_home_text(None))
     try:
         match = re.search(r"\{[\s\S]*\}", raw)
         return bool(json.loads(match.group(0))["needs_more_info"])

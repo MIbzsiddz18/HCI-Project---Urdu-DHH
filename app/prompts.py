@@ -15,6 +15,8 @@ preserving the requested action and its details."""
 
 ACTION_VERBS_PROMPT = """Suggest exactly 8 short action labels for starting a command.
 Return a JSON array of strings only. Write natural, concise Urdu in Urdu script.
+Use respectful/formal phrasing such as کریں and دکھائیں; avoid casual forms such
+as کرو, دیکھو, or چلاؤ.
 Use the available smart-home environment and recent command history to avoid
 irrelevant or duplicate actions. Do not include examples or explanations.
 
@@ -23,12 +25,15 @@ Recent commands: {history}"""
 
 TASK_OPTIONS_PROMPT = """The user chose this action: {verb}
 The most recent user request in the history is the task they are trying to
-complete. Suggest exactly 8 distinct, short Urdu command options that help
+complete. Suggest up to 8 distinct, short Urdu command options that help
 complete that request using the chosen action. Every option must be relevant
-to that latest request; do not pad the list with unrelated categories. If the
-request is specific (for example a duration, color, place, or named event),
-preserve that detail in the options. Use Urdu script and natural Pakistani
-Urdu. Do not copy generic examples, add explanations, or invent capabilities.
+to that latest request. Options must express meaningfully different choices
+or details, not the same command rephrased with synonyms. If fewer than 8
+meaningfully different options exist, return fewer; never pad with duplicates
+or unrelated categories. If the request is specific (for example a duration,
+color, place, or named event), preserve that detail in the options. Use Urdu
+script and natural, respectful Pakistani Urdu. Do not add explanations or
+invent capabilities.
 Return a JSON array of strings only.
 
 Environment: {home_env}

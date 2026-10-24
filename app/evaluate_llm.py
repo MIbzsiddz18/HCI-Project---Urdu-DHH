@@ -6,6 +6,7 @@ automated linguistic validation.
 """
 
 import json
+import argparse
 import time
 
 try:
@@ -45,6 +46,13 @@ ACTION_FOR_COMMAND = {
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--limit", type=int, default=len(SAMPLE_COMMANDS),
+                        help="number of task prompts to call (use 1 for a low-cost smoke check)")
+    args = parser.parse_args()
+    if args.limit < 1:
+        parser.error("--limit must be at least 1")
+
     history = []
     env = get_state()
     print("Urdu LLM output review (manually assess correctness/context):")
@@ -54,7 +62,7 @@ def main():
     print(json.dumps(verbs, ensure_ascii=False, indent=2))
     print(f"Latency: {time.perf_counter() - started:.2f}s")
     print("Backend:", llm_client.get_backend_status())
-    for index, command in enumerate(SAMPLE_COMMANDS, 1):
+    for index, command in enumerate(SAMPLE_COMMANDS[:args.limit], 1):
         started = time.perf_counter()
         options = get_task_options(ACTION_FOR_COMMAND[command], history + [command], env)
         print(f"\n{index:02}. {command}")
