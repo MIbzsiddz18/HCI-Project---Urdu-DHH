@@ -1,430 +1,453 @@
-# Implementation Plan
-## Urdu DHH Intelligent Personal Assistant
+# Implementation Plan: Urdu LLM-Assisted Touch Interface for DHH Users
 
-**Project:** Deaf and Hard of Hearing Access to Intelligent Personal Assistants  
-**Prototype:** Comparing voice-based input with an LLM-powered touch interface adapted for Urdu  
-**Timeline:** 7 days  
-**Branch:** `dev`
+**Project:** Replication & Cultural Adaptation of DeVries et al. (CHI 2026)  
+**Team:** Faraz, Ashhal, Ibrahim  
+**Timeline:** 48 hours (MVP) + 1 week (full study, due Nov 1)  
+**Budget:** $0 (free-tier only)
 
 ---
 
-# Part 1 — System Architecture
+## 1. Project Scope (What We ARE Building)
 
-## 1.1 Objective
+We build **only the LLM-assisted touch interface condition** from the original paper, adapted for Pakistani Urdu-speaking DHH users.
 
-Build a functional prototype that allows Deaf and Hard of Hearing (DHH) users to interact with an intelligent personal assistant through a visual, touch-based interface.
+### In Scope
+- Gradio web app with Urdu/English UI
+- Groq API (Llama 3.1 8B Instant) for LLM-generated command suggestions
+- Simulated smart home environment (in-app state dictionary)
+- 5 culturally localized tasks (Urdu)
+- Bilingual SUS + Adjective Scale + NPS questionnaires
+- Semi-structured interviews (Urdu)
+- 5–8 DHH participants (convenience sample)
 
-The user should be able to select an intended action, choose a task, answer clarification questions, review a proposed command, explicitly confirm it, and observe its simulated execution.
+### Out of Scope (Document as Limitations)
+- Voice conditions (Natural Deaf Speech, Wizard-of-Oz)
+- Real Amazon Echo Show / Philips Hue hardware
+- Urdu ASR / WER analysis
+- Large sample (N=20) or statistical power
+- Validated Urdu SUS translation
 
-The initial implementation targets an Urdu-speaking context in Pakistan, with English support retained for development and testing.
+---
 
-**MVP priority:** Complete a reliable end-to-end workflow using mock devices before adding optional LLM functionality or attempting real device integrations.
+## 2. Technical Stack
 
-## 1.2 Architecture Overview
-
-```text
-┌─────────────────────────────────────────┐
-│          React + TypeScript             │
-│                                         │
-│ Touch UI | Task Selection | Review      │
-│ Urdu/English | RTL/LTR | Status         │
-└───────────────────┬─────────────────────┘
-                    │
-               HTTP / JSON
-                    │
-┌───────────────────▼─────────────────────┐
-│             Flask REST API              │
-│                                         │
-│ Routes                                  │
-│   ├── Session routes                    │
-│   ├── Workflow routes                   │
-│   └── Device routes                     │
-│                                         │
-│ Services                                │
-│   ├── Session Service                   │
-│   ├── Workflow Service                  │
-│   ├── Command Service                   │
-│   └── LLM Service (optional)            │
-│                                         │
-│ Adapter                                 │
-│   └── Mock Assistant / Devices          │
-└─────────────────────────────────────────┘
-```
-
-The frontend communicates only with the backend API. It must not call the LLM provider directly or execute device commands independently.
-
-The backend owns session state, workflow transitions, command validation, confirmation enforcement, and simulated execution.
-
-## 1.3 Technology Stack
-
-| Component | Technology | Purpose |
+| Component | Tool | Why |
 |---|---|---|
-| Frontend | React, TypeScript, Vite | Interactive touch interface |
-| Backend | Python, Flask | REST API and workflow orchestration |
-| API format | JSON over HTTP | Frontend/backend communication |
-| LLM | Optional provider-compatible API | Generate suggestions and clarification questions |
-| Device integration | Mock adapter | Simulate supported smart-home actions |
-| Testing | pytest | Backend and API contract tests |
-| Configuration | Environment variables | API keys and development settings |
+| **LLM** | Groq API — `llama-3.1-8b-instant` | Free (14,400 req/day), ultra-fast (~500 tok/s), reliable instruction-following |
+| **Frontend** | Gradio (Python) | 100–150 lines, no HTML/CSS needed, runs locally |
+| **Smart Home** | Python dictionary (simulated) | No hardware, instant state updates, safe |
+| **Questionnaires** | Google Forms (bilingual) | Free, easy to share, auto-exports to Sheets |
+| **Audio Recording** | Phone voice recorder | Free, no setup |
+| **Transcription** | Manual (bilingual team member) | No budget for paid transcription |
+| **Analysis** | Python (pandas, matplotlib) + manual thematic coding | Free |
+| **Version Control** | GitHub (free) | Backup + team collaboration |
 
-Use the existing repository configuration where available. Do not introduce a second frontend or backend framework.
+**Fallback Plan:** If Llama 3.1 8B's Urdu output is poor, LLM will output English internally; app will map to hardcoded Urdu strings for display. This guarantees clean Urdu UI regardless of LLM quality.
 
-## 1.4 Repository Structure
+---
+
+## 3. Directory Structure
 
 ```text
-project-root/
-├── frontend/
-│   ├── package.json
-│   ├── index.html
-│   └── src/
-│       ├── api/
-│       │   └── client.ts
-│       ├── components/
-│       ├── pages/
-│       ├── i18n/
-│       │   └── labels.ts
-│       ├── types/
-│       │   └── api.ts
-│       ├── App.tsx
-│       └── main.tsx
-├── backend/
-│   ├── app.py
-│   ├── requirements.txt
-│   ├── routes/
-│   │   ├── sessions.py
-│   │   ├── workflow.py
-│   │   └── devices.py
-│   ├── services/
-│   │   ├── session_service.py
-│   │   ├── workflow_service.py
-│   │   ├── command_service.py
-│   │   └── llm_service.py
-│   ├── adapters/
-│   │   └── assistant_mock.py
-│   └── tests/
-│       └── test_api.py
-├── docs/
-│   ├── architecture.md
-│   └── api-contract.md
-├── .env.example
+urdu-ipa-project/
+│
+├── README.md                    # Setup + run instructions
+├── requirements.txt             # gradio, groq, pandas, python-dotenv
+├── .env                         # GROQ_API_KEY (gitignored)
 ├── .gitignore
-├── README.md
-└── IMPLEMENTATION_PLAN.md
+│
+├── app/
+│   ├── main.py                  # Gradio app entry point
+│   ├── llm_client.py            # Groq API wrapper + prompts
+│   ├── smart_home.py            # Simulated state dict + update logic
+│   ├── prompts.py               # All Urdu/English LLM prompts
+│   ├── translations.py          # Hardcoded Urdu strings (fallback)
+│   └── tasks.py                 # Localized task lists
+│
+├── questionnaires/
+│   ├── sus_bilingual.pdf        # Urdu + English SUS
+│   ├── adjective_nps.pdf        # Adjective Scale + NPS
+│   └── consent_form.pdf         # Bilingual consent
+│
+├── study/
+│   ├── protocol.md              # Step-by-step session procedure
+│   ├── interview_guide_urdu.md  # 5 interview questions (Urdu + English)
+│   ├── demographics_survey.md   # Pre-experiment survey
+│   └── session_log_template.csv # For recording per-participant data
+│
+├── data/
+│   ├── raw/                     # Raw session logs, audio files
+│   ├── transcripts/             # Interview transcripts
+│   └── processed/               # SUS scores, cleaned data
+│
+├── analysis/
+│   ├── sus_scores.py            # SUS calculation + descriptive stats
+│   ├── latency_analysis.py      # Mean latency per command
+│   └── thematic_coding.md       # Theme tracking (shared doc)
+│
+└── docs/
+    ├── final_report.md          # Final submission (Nov 1)
+    ├── presentation.pdf
+    └── limitations.md           # Drafted limitations section
 ```
 
-Keep modules focused on one responsibility. Add files only when needed rather than creating unnecessary abstractions.
+---
 
-## 1.5 Module Responsibilities
+## 4. Three-Way Work Division
 
-### Frontend
+### FARAZ — Study Design & Analysis Lead
 
-- `App.tsx`: Main application layout and language/direction setup.
-- `pages/`: Main assistant workflow screen.
-- `components/`: Reusable action cards, task options, clarification prompts, command review, and status indicators.
-- `api/client.ts`: Centralized HTTP requests, error handling, and API base URL.
-- `i18n/labels.ts`: English and Urdu interface labels.
-- `types/api.ts`: Shared TypeScript interfaces for API requests and responses.
+**Responsibilities:** Experimental protocol, participant recruitment, session running, data analysis, final report.
 
-The interface must support large touch targets, clear visual feedback, keyboard-accessible controls, and Urdu right-to-left layout.
+**Deliverables (48 hours):**
+- `study/protocol.md` — step-by-step session procedure
+- `study/session_log_template.csv`
+- `analysis/sus_scores.py`
+- `analysis/latency_analysis.py`
+- `docs/limitations.md` — drafted limitations
+- **Recruit 2–3 pilot participants** for Sunday
+- `docs/presentation.pdf` — slides for Sunday submission
 
-### Backend
+**Timeline:**
 
-- `app.py`: Create the Flask application, register routes, and expose the health endpoint.
-- `routes/sessions.py`: Create, retrieve, and end sessions.
-- `routes/workflow.py`: Handle action selection, task selection, clarification, command drafting, confirmation, and execution.
-- `routes/devices.py`: Return the available mock devices and supported actions.
-- `services/session_service.py`: Manage session state and lifecycle.
-- `services/workflow_service.py`: Coordinate workflow stages and validate transitions.
-- `services/command_service.py`: Validate, confirm, and execute allowed commands.
-- `services/llm_service.py`: Optional LLM integration with deterministic fallback.
-- `adapters/assistant_mock.py`: Supply mock devices and simulate assistant/device responses.
-- `tests/test_api.py`: Verify API behavior, workflow progression, validation, and confirmation enforcement.
+| Hours | Task |
+|---|---|
+| 0–2 | Write `study/protocol.md`: consent → pre-survey → exploration → 5 tasks → SUS → interview. 30–40 min per session. |
+| 2–6 | Write `session_log_template.csv`. Write `sus_scores.py` (SUS scoring + descriptive stats). |
+| 6–10 | Write `latency_analysis.py`. Draft `limitations.md`. Draft experimental plan document (due Sunday). |
+| 10–14 | Recruit 2–3 pilot participants (DHH if possible, otherwise bilingual hearing for UX pilot). Schedule Sunday sessions. |
+| 14–18 | Build `presentation.pdf` skeleton (intro, methods, expected results, limitations). |
+| 18–22 | Run pilot sessions (with Ashhal). Note what breaks. |
+| 22–24 | Finalize experimental plan document. Submit with app screenshots + presentation. |
 
-## 1.6 API Contract
+**Full Study Week:** Recruit 5–8 DHH participants, schedule sessions, run analysis (SUS + thematic coding), write final report, prepare final presentation.
 
-All endpoints use the `/api/v1` prefix except `/health`.
+**LLM Chat Prompts for Faraz:**
 
-| Method | Endpoint | Purpose |
-|---|---|---|
-| GET | `/health` | Check backend availability |
-| GET | `/api/v1/devices` | List available mock devices |
-| POST | `/api/v1/sessions` | Create a session |
-| GET | `/api/v1/sessions/{session_id}` | Retrieve session state |
-| POST | `/api/v1/sessions/{session_id}/actions` | Select an intended action |
-| POST | `/api/v1/sessions/{session_id}/tasks` | Select a task |
-| POST | `/api/v1/sessions/{session_id}/clarifications` | Submit clarification |
-| POST | `/api/v1/sessions/{session_id}/command-draft` | Generate a command proposal |
-| POST | `/api/v1/sessions/{session_id}/confirm` | Confirm the proposed command |
-| POST | `/api/v1/sessions/{session_id}/execute` | Execute a confirmed command |
-| POST | `/api/v1/sessions/{session_id}/cancel` | Cancel the current workflow |
-| DELETE | `/api/v1/sessions/{session_id}` | End a session |
+```
+Prompt 1 (protocol.md):
+"I am writing a step-by-step experimental protocol for a usability study 
+of an LLM-assisted touch interface for Pakistani Deaf and Hard of Hearing 
+Urdu speakers. The session should take 30-40 minutes: consent, 
+pre-survey, 5-minute exploration, 5 tasks, SUS questionnaire, and a 
+5-minute semi-structured interview. Write a detailed protocol.md in 
+Markdown with numbered steps for the researcher to follow. Include 
+estimated time per step."
 
-Request and response schemas must be documented in `docs/api-contract.md` before parallel implementation begins.
+Prompt 2 (sus_scores.py):
+"Write a Python script that calculates the System Usability Scale (SUS) 
+score from 10 Likert responses (1-5). Odd-numbered items (1,3,5,7,9) 
+are scored as (response - 1). Even-numbered items (2,4,6,8,10) are 
+scored as (5 - response). The total is multiplied by 2.5 to give a 
+0-100 score. Also compute mean, standard deviation, and median across 
+multiple participants. Read data from a CSV file and print results."
 
-### Contract conventions
-
-- JSON fields use `snake_case`.
-- Session IDs are generated by the backend.
-- The backend is the source of truth for workflow state.
-- Every error response should contain a stable error code and a readable message.
-- Invalid workflow transitions must return an appropriate 4xx response.
-- An execution result must clearly identify simulated execution using `"simulated": true`.
-
-### Session stages
-
-```text
-action_selection
-      ↓
-task_selection
-      ↓
-clarification (if required)
-      ↓
-review
-      ↓
-ready_to_execute
-      ↓
-executing
-      ↓
-completed
+Prompt 3 (session_log_template.csv):
+"Create a CSV template for logging per-participant session data for a 
+usability study. Columns should include: participant_id, date, age, 
+gender, hearing_status (Deaf/HoH), hearing_device (cochlear implant/
+hearing aid/none), language_background (Urdu/English/PSL mix), 
+prior_ipa_experience, task_completion_rate, mean_latency_seconds, 
+sus_score, adjective_score, nps_score, session_notes."
 ```
 
-Cancellation and errors must be handled explicitly. A session must not skip required workflow stages.
+---
 
-### Command schema
+### ASHHAL — Frontend & UX Lead
 
-```json
-{
-  "device_id": "living_room_light",
-  "action": "turn_on",
-  "parameters": {}
+**Responsibilities:** Gradio app UI, task flow, questionnaires, participant-facing materials.
+
+**Deliverables (48 hours):**
+- `app/main.py` — full Gradio app (working)
+- `questionnaires/sus_bilingual.pdf` — Urdu + English SUS
+- `questionnaires/adjective_nps.pdf`
+- `questionnaires/consent_form.pdf`
+- `study/interview_guide_urdu.md`
+- `study/demographics_survey.md`
+
+**Timeline:**
+
+| Hours | Task |
+|---|---|
+| 0–2 | Design Gradio layout (sketch on paper). Decide: 3×3 button grid, history panel, state display. |
+| 2–8 | Build `main.py` skeleton: start screen → task selection → verb buttons → option buttons → command confirmation → state update. Use dummy LLM responses first. |
+| 8–14 | Integrate Faraz's `llm_client.py` (wait for Faraz to finish it by Hour 10). Test full flow. Fix UI bugs. |
+| 14–18 | Create bilingual SUS + Adjective + NPS + consent form (Google Docs → PDF). Translate with team. |
+| 18–22 | Write `interview_guide_urdu.md` (5 questions, Urdu + English). Write `demographics_survey.md`. |
+| 22–24 | Full app dry-run with Faraz. Document UX issues. |
+
+**Full Study Week:** Run participant sessions (primary facilitator), take notes, collect questionnaires, transcribe interviews.
+
+**LLM Chat Prompts for Ashhal:**
+
+```
+Prompt 1 (main.py skeleton):
+"Create a Gradio web app in Python for a smart home assistant research 
+study. The app should have: (1) a welcome screen with a task list, 
+(2) a 3x3 grid of buttons showing 8 LLM-generated action verb options 
+in Urdu + English, (3) after selection, another 3x3 grid of task options, 
+(4) a confirmation screen showing the final command, (5) a smart home 
+state display showing light status, timer, calendar, etc. Use dummy 
+hardcoded responses for now. Structure it so the LLM call can be 
+plugged in later via a function called get_llm_options(verb, history)."
+
+Prompt 2 (interview_guide_urdu.md):
+"Write a semi-structured interview guide in Markdown for a usability 
+study of a smart home touchscreen app for Pakistani Deaf and Hard of 
+Hearing users. Include 5 questions in both Urdu script and English 
+translation. Topics: (1) easiest/hardest part of using the app, 
+(2) quality of Urdu translations, (3) privacy concerns about AI 
+remembering habits, (4) interest in hands-free alternatives (voice/sign), 
+(5) suggestions for improvement. Include probing follow-ups."
+
+Prompt 3 (demographics_survey.md):
+"Create a bilingual (Urdu + English) pre-experiment demographic survey 
+in Markdown. Include: age, gender, hearing status (Deaf/HoH/Deaf-Blind), 
+hearing device (cochlear implant/hearing aid/none), preferred 
+communication languages (Urdu/English/PSL/other), prior experience 
+with voice assistants (yes/no, frequency), and any accessibility needs."
+```
+
+---
+
+### IBRAHIM — LLM & Backend Lead
+
+**Responsibilities:** Groq API integration, prompt engineering, smart home simulation, LLM fallback logic.
+
+**Deliverables (48 hours):**
+- `app/llm_client.py` — working Groq wrapper with error handling
+- `app/prompts.py` — all prompts translated from paper's Appendix C to Urdu/English
+- `app/smart_home.py` — state dictionary + update functions
+- `app/translations.py` — hardcoded Urdu fallback strings
+- `app/tasks.py` — localized task list
+- `requirements.txt` + `.env.example`
+- Test Llama 3.1 8B with 10 sample commands. Document output quality.
+
+**Timeline:**
+
+| Hours | Task |
+|---|---|
+| 0–2 | Get Groq API key. Test Llama 3.1 8B with 5 sample Urdu prompts. Report quality. |
+| 2–6 | Write `prompts.py` (all 6 prompts from Appendix C, localized). |
+| 6–10 | Write `llm_client.py` + `smart_home.py`. Test end-to-end via terminal. **Deliver `llm_client.py` to Ashhal by Hour 10.** |
+| 10–14 | Write `translations.py` fallback. Test all 5 tasks end-to-end. Fix bugs. |
+| 14–18 | Write `tasks.py` with localized task list. Final LLM testing. |
+| 18–24 | Buffer: fix bugs found by Ashhal/Faraz. Document LLM quirks. |
+
+**Full Study Week:** Fix bugs, optimize prompts based on pilot feedback, help with data analysis.
+
+**LLM Chat Prompts for Ibrahim:**
+
+```
+Prompt 1 (llm_client.py):
+"Write a Python module llm_client.py that wraps the Groq API to generate 
+smart home command options in Urdu. Use the groq Python SDK with model 
+'llama-3.1-8b-instant'. Include functions: (1) get_action_verbs(history, 
+home_env) returns a list of 8 Urdu verbs, (2) get_task_options(verb, 
+history, home_env) returns 8 task options, (3) needs_more_info(task) 
+returns bool, (4) get_followup_question(task) returns a question, 
+(5) get_followup_options(question) returns 8 answer options, 
+(6) build_final_command(task, question, answer) returns a complete 
+command. Include error handling for API failures and a fallback to 
+hardcoded responses if the API is unreachable."
+
+Prompt 2 (prompts.py):
+"Write a Python file prompts.py containing all LLM prompt templates for 
+a smart home assistant study. The prompts must generate Urdu-language 
+options for: (1) initial action verbs, (2) task options for a chosen 
+verb, (3) whether a task needs more info, (4) a follow-up question, 
+(5) answer options for the follow-up, (6) final command assembly. 
+Each prompt should consider: the smart home environment (lights, timer, 
+calendar, weather, recipe), user command history, and culturally 
+relevant Pakistani tasks (biryani recipe, Fajr reminder, Lahore weather, 
+tea timer). Include a note that if Urdu output is inconsistent, the 
+LLM should output English internally with a mapping to Urdu."
+
+Prompt 3 (smart_home.py):
+"Write a Python module smart_home.py that simulates a smart home state 
+dictionary. State includes: light (off/on), light_color 
+(white/blue/red/green), timer (None or duration string), reminder 
+(None or string), calendar (string), weather (string), recipe (string). 
+Include functions: update_state(command) parses a command string and 
+updates the relevant field, get_state_display() returns a formatted 
+string showing current state for the UI, reset_state() resets all fields."
+
+Prompt 4 (tasks.py):
+"Write a Python file tasks.py with a list of 5 culturally localized 
+smart home tasks for Pakistani Urdu speakers. Each task has an Urdu 
+string, an English translation, and an expected smart home state change. 
+Tasks: (1) Check Lahore weather, (2) Set a 5-minute tea timer, 
+(3) Set light color to blue, (4) Show a biryani recipe, 
+(5) Set a Fajr prayer reminder."
+
+Prompt 5 (translations.py):
+"Write a Python file translations.py with hardcoded Urdu strings that 
+map to English smart home commands. Include translations for: turn on/
+off light, set light color to blue/red/green, set timer for 5/10 minutes, 
+check weather in Lahore, show biryani recipe, set Fajr reminder, show 
+calendar. Format as a dictionary with English keys and Urdu values."
+```
+
+---
+
+## 5. 48-Hour Master Timeline
+
+### Saturday (Day 1) — Build
+
+| Time | Faraz | Ashhal | Ibrahim |
+|---|---|---|---|
+| **09:00–11:00** | Write protocol.md | Gradio layout design | Groq setup + LLM test |
+| **11:00–13:00** | Write session_log + sus_scores.py | Build main.py skeleton | Write prompts.py |
+| **13:00–14:00** | *Lunch* | *Lunch* | *Lunch* |
+| **14:00–17:00** | latency_analysis.py + draft limitations | Integrate LLM (dummy first), test flow | llm_client.py + smart_home.py |
+| **17:00–19:00** | Recruit pilot participants | Fix UI bugs | **Deliver llm_client.py to Ashhal** + translations.py |
+| **19:00–20:00** | *Dinner* | *Dinner* | *Dinner* |
+| **20:00–23:00** | Build presentation skeleton | Create questionnaires + interview guide | tasks.py + final LLM testing |
+| **23:00–00:00** | Buffer: support team | Full dry-run with Faraz | Full dry-run with Ashhal |
+
+### Sunday (Day 2) — Test & Submit
+
+| Time | Faraz | Ashhal | Ibrahim |
+|---|---|---|---|
+| **09:00–12:00** | Run pilot sessions | Run pilot sessions | Fix bugs from pilot |
+| **12:00–14:00** | Analyze pilot data | Fix UX issues | Optimize prompts based on pilot |
+| **14:00–17:00** | Write experimental plan doc | Final questionnaire check | Final testing |
+| **17:00–19:00** | Build presentation slides | Build presentation slides | Help with presentation |
+| **19:00–21:00** | Review everything | Review everything | Review everything |
+| **21:00–00:00** | **SUBMIT:** experimental plan + app + presentation | | |
+
+### Week (Oct 25 – Nov 1) — Full Study
+
+| Day | Task |
+|---|---|
+| **Mon–Tue** | Recruit 5–8 DHH participants via Deaf Reach, PAD, personal networks. Schedule sessions. |
+| **Wed–Thu** | Run all sessions (Ashhal facilitates, Faraz notes, Ibrahim handles tech). |
+| **Fri** | Transcribe interviews (Ibrahim + Ashhal split). Faraz computes SUS + latency stats. |
+| **Sat** | Thematic coding (Faraz + Ashhal). Ibrahim writes results section. |
+| **Sun (Nov 1)** | Finalize report + presentation. **Submit by night.** |
+
+---
+
+## 6. Key Implementation Details
+
+### 6.1 LLM Prompt Strategy
+
+Use the paper's Appendix C prompts as templates. Key adaptation:
+
+```
+You are an Urdu-speaking smart home assistant for Pakistani users. 
+Generate 8 action verbs in Urdu script (اردو) for starting commands. 
+Examples: "روشن کریں" (turn on), "سیٹ کریں" (set), "دکھائیں" (show). 
+Consider this smart home: {lights, timer, calendar, weather, recipe}. 
+User history: {commands_so_far}. 
+Return only the verbs, one per line, no numbering, no quotes.
+```
+
+**Test criterion:** If 6/8 verbs are correct Urdu and contextually relevant → keep Urdu output. Otherwise → switch to English-internal/Urdu-display fallback.
+
+### 6.2 Simulated Smart Home
+
+```python
+state = {
+    "light": "off",           # off / on
+    "light_color": "white",   # white / blue / red / green
+    "timer": None,            # None / "5 min" / "10 min"
+    "reminder": None,         # None / "Fajr" / "lunch"
+    "calendar": "No events today",
+    "weather": "Not checked",
+    "recipe": "Not shown"
 }
 ```
 
-The backend must validate device IDs, supported actions, parameters, and the current session stage.
+When user confirms a command, parse it and update the relevant field. Display state visually (e.g., a "light bulb" icon changes color).
 
-**Critical safety rule:** Drafting a command must never execute it. Execution is permitted only after explicit confirmation of the current command. Reject unconfirmed execution with HTTP `409` and error code `COMMAND_NOT_CONFIRMED`.
+### 6.3 Localized Task List (5 Tasks)
 
-If a command changes after confirmation, its confirmation must be invalidated.
+1. **"Lahore mein aaj ka mausam check karein"** (Check today's weather in Lahore)
+2. **"Chai ke liye 5 minute ka timer lagayein"** (Set a 5-minute tea timer)
+3. **"Batti ko neela rang dein"** (Set the light to blue)
+4. **"Biryani ki recipe dikhayein"** (Show a biryani recipe)
+5. **"Fajr ke liye reminder lagayein"** (Set a Fajr reminder)
 
-## 1.7 LLM and Mock Device Strategy
+### 6.4 SUS Scoring
 
-The application must work without an API key.
+Standard SUS scoring in `sus_scores.py`:
 
-Implement deterministic suggestions and clarification rules first. The LLM service may later replace or improve suggestion generation without changing the API contract.
+```python
+def sus_score(responses):
+    # responses: list of 10 ints (1-5)
+    # Odd items (1,3,5,7,9): score - 1
+    # Even items (2,4,6,8,10): 5 - score
+    total = 0
+    for i, r in enumerate(responses, start=1):
+        if i % 2 == 1:
+            total += (r - 1)
+        else:
+            total += (5 - r)
+    return total * 2.5  # 0-100
+```
 
-The LLM may:
+### 6.5 Fallback Plan (If Anything Breaks)
 
-- Suggest likely user intentions.
-- Generate task options.
-- Ask clarification questions.
-- Help interpret supported natural-language requests.
-
-The LLM must not execute commands directly, bypass validation, or mark commands as confirmed.
-
-The mock adapter should initially support a small, predictable set of devices and actions, such as turning a light on or off and setting a thermostat temperature. Unsupported actions must return a controlled error.
-
-No real smart-home device integration is required for the MVP.
-
-## 1.8 Urdu and Accessibility Requirements
-
-- Provide Urdu and English interface labels.
-- Switch document direction between RTL for Urdu and LTR for English.
-- Use appropriate Urdu text rendering and alignment.
-- Present tasks and actions as clear selectable visual controls.
-- Make clarification questions understandable and easy to answer.
-- Show the proposed command before execution.
-- Provide visible success, failure, loading, and cancellation states.
-- Do not depend on sound alone to communicate important information.
-- Keep text-to-speech or voice output optional; it is not a prerequisite for the touch-interface MVP.
-
----
-
-# Part 2 — Team Responsibilities
-
-Each member owns implementation deliverables, not just documentation. All members must use the agreed API contract and integrate through the shared `dev` branch.
-
-## 2.1 Muhammad Ibrahim — Backend and Workflow
-
-**Primary ownership:** Backend orchestration, session lifecycle, and command safety.
-
-Deliverables:
-
-1. Implement the Flask application and route registration.
-2. Implement session creation, retrieval, and lifecycle management.
-3. Implement workflow transitions and request validation.
-4. Implement command drafting, confirmation, cancellation, and execution enforcement.
-5. Add the optional LLM service behind a stable interface.
-6. Ensure the deterministic fallback works without credentials.
-7. Review backend tests and resolve integration defects.
-
-**Definition of done:** The backend supports the documented workflow, rejects invalid transitions, and cannot execute an unconfirmed command.
-
-## 2.2 Faraz Ansari — Frontend and Urdu Interface
-
-**Primary ownership:** Touch interface, API integration, and bilingual presentation.
-
-Deliverables:
-
-1. Implement the main assistant screen.
-2. Build reusable action, task, clarification, review, and status components.
-3. Connect the interface to the backend through `client.ts`.
-4. Define and use TypeScript API interfaces.
-5. Implement Urdu/English switching and RTL/LTR layout.
-6. Display backend validation errors and workflow state clearly.
-7. Test the full interface against the deterministic backend.
-
-**Definition of done:** A user can complete the workflow through the touch interface, review the proposed command, explicitly confirm it, and see the result.
-
-## 2.3 Ashhal Aamir — Mock Adapter, Testing, and Integration
-
-**Primary ownership:** Predictable device simulation, independent verification, and demo readiness.
-
-Deliverables:
-
-1. Implement the mock device catalog and supported action definitions.
-2. Implement the mock assistant/device adapter.
-3. Create API and workflow tests, including negative cases.
-4. Test invalid device/action combinations and unconfirmed execution.
-5. Verify frontend/backend integration using the agreed contract.
-6. Prepare reproducible setup instructions and a short demo script.
-7. Run clean-start and end-to-end checks and report defects.
-
-**Definition of done:** The prototype can be started from documented instructions, its simulated actions behave consistently, and its critical workflow and safety rules are covered by tests.
-
-## 2.4 Collaboration Rules
-
-- Agree on `docs/api-contract.md` before developing dependent features in parallel.
-- Keep changes within each member's owned modules where possible.
-- Communicate any API schema change before implementing it.
-- Use feature branches for independent work and merge through pull requests into `dev`.
-- Avoid committing `.env` files containing secrets.
-- Every merged feature must be runnable and include relevant tests.
-- Integrate small changes frequently instead of merging all work at the end.
+| Problem | Fallback |
+|---|---|
+| Groq API down/rate-limited | Switch to OpenRouter free tier (`meta-llama/llama-3.1-8b-instruct:free` — 50 req/day) or HuggingFace Inference API |
+| Urdu LLM output poor | English-internal/Urdu-display fallback (see 6.1) |
+| Gradio crashes | Run in simplest mode (no CSS, basic blocks) |
+| Can't recruit DHH participants | Run with bilingual hearing participants for pilot; document as limitation; recruit DHH for full study week |
+| No internet during session | Pre-cache LLM responses for all task paths (run through app once, save outputs to JSON, load offline) |
 
 ---
 
-# Part 3 — Seven-Day Implementation Schedule
+## 7. Free-Tier API Reference
 
-## Day 1 — Foundation and Contract
+| Provider | Model | Free Quota | Speed | Urdu Quality |
+|---|---|---|---|---|
+| **Groq** (primary) | `llama-3.1-8b-instant` | 14,400 req/day | Very fast | Moderate |
+| Groq (backup) | `llama-3.3-70b-versatile` | 1,000 req/day | Fast | Better |
+| OpenRouter (fallback) | `meta-llama/llama-3.1-8b-instruct:free` | 50 req/day | Slow | Moderate |
+| HuggingFace (last resort) | Various | Limited | Slow | Varies |
 
-**Goal:** Everyone can develop against the same architecture.
-
-- Muhammad: Initialize Flask, health endpoint, and basic route registration.
-- Faraz: Verify frontend setup and create the application shell.
-- Ashhal: Implement the initial mock device catalog and agree on test scenarios.
-- All: Finalize API request/response schemas, session stages, and error conventions.
-
-**Milestone:** Frontend and backend start independently; API contract is agreed upon.
-
-## Day 2 — Deterministic End-to-End Workflow
-
-- Muhammad: Implement sessions and workflow transitions.
-- Faraz: Implement action/task selection and connect the initial API calls.
-- Ashhal: Implement mock execution and test the main workflow.
-
-**Milestone:** A user can select a task, generate a deterministic command, confirm it, and simulate execution.
-
-## Day 3 — Clarification and Safety
-
-- Muhammad: Implement clarification handling, command validation, and confirmation enforcement.
-- Faraz: Add clarification UI, command review, and cancellation states.
-- Ashhal: Add positive and negative API tests.
-
-**Milestone:** Required clarification works, invalid commands are rejected, and unconfirmed execution is impossible through the API.
-
-## Day 4 — Urdu and Optional LLM Integration
-
-- Muhammad: Add the optional LLM provider behind the existing service interface.
-- Faraz: Implement Urdu labels, language switching, and RTL layout.
-- Ashhal: Test deterministic fallback behavior, mock responses, and representative Urdu workflows.
-
-**Milestone:** The core workflow works in both languages, whether or not an LLM API key is configured.
-
-## Day 5 — Integration and Error Handling
-
-- Muhammad: Resolve backend defects and stabilize error responses.
-- Faraz: Handle loading, network errors, invalid responses, and completed states.
-- Ashhal: Run integrated tests and verify session isolation and command safety.
-
-**Milestone:** No known critical defect in the main workflow.
-
-## Day 6 — Feature Freeze and Rehearsal
-
-- All: Freeze new features.
-- Muhammad: Verify backend setup and confirmation enforcement.
-- Faraz: Test the interface at presentation/demo size and verify RTL behavior.
-- Ashhal: Verify clean setup, run the full test suite, and prepare demo steps.
-
-**Milestone:** The prototype runs from documented setup instructions without relying on developer-specific configuration.
-
-## Day 7 — Final Verification and Presentation
-
-- Run the full workflow from a clean start.
-- Verify the no-API-key fallback.
-- Demonstrate Urdu/English interface behavior.
-- Verify command review, explicit confirmation, simulated execution, and cancellation.
-- Fix only critical defects and prepare the final demonstration.
-
-**Milestone:** A stable, reproducible prototype ready for evaluation.
+**Recommendation:** Use Groq's Llama 3.1 8B for all development and testing. If Urdu quality is unacceptable, switch to Llama 3.3 70B (only for final study, not dev).
 
 ---
 
-# Part 4 — Acceptance Criteria
+## 8. Final Deliverables Checklist
 
-The MVP is complete when all the following conditions are satisfied:
+### Due Sunday Night (48 hours)
+- [ ] Working Gradio app (runnable via `python app/main.py`)
+- [ ] Experimental plan document (2–3 pages)
+- [ ] Presentation slides (10–12 slides)
+- [ ] Bilingual questionnaires (SUS, Adjective, NPS, consent)
+- [ ] Interview guide (Urdu + English)
+- [ ] Task list (5 localized tasks)
+- [ ] Pilot data from 2–3 participants (if possible)
 
-- [ ] Frontend and backend start using documented commands.
-- [ ] The backend health endpoint responds successfully.
-- [ ] A session can be created and retrieved.
-- [ ] A user can select an action and task.
-- [ ] Clarification is supported when needed.
-- [ ] A proposed command is displayed before execution.
-- [ ] The user must explicitly confirm the current command.
-- [ ] Unconfirmed and invalid commands are rejected by the backend.
-- [ ] Successful mock execution is reported as simulated.
-- [ ] Cancellation and error states are handled.
-- [ ] Urdu RTL and English LTR layouts work.
-- [ ] The prototype runs without LLM credentials.
-- [ ] Tests cover the core workflow and critical negative cases.
-- [ ] Setup instructions and a repeatable demo script are available.
-
-# Part 5 — Scope and Priorities
-
-## Must have
-
-- Working React/Flask integration.
-- Session and workflow management.
-- Touch-based task selection.
-- Clarification and command review.
-- Explicit confirmation and simulated execution.
-- Urdu/English support.
-- Deterministic fallback and essential tests.
-
-## Should have
-
-- Optional LLM-generated task suggestions.
-- Improved Urdu phrasing and error messages.
-- Stronger test coverage and polished demo flow.
-
-## Out of scope for the first week
-
-- Real smart-home device control.
-- Real Alexa integration.
-- User accounts and production authentication.
-- Persistent database storage.
-- Production deployment and scalability.
-- Claims that the Urdu replication study has already been conducted.
-
-These features can be considered after the core prototype is stable.
+### Due Nov 1 (Full Study)
+- [ ] 5–8 DHH participant sessions completed
+- [ ] SUS + Adjective + NPS scores collected
+- [ ] Interview transcripts + thematic analysis
+- [ ] Final report (6–8 pages): intro, related work, methods, results, discussion, limitations, conclusion
+- [ ] Final presentation
 
 ---
 
-# Part 6 — Development Principles
+## 9. Risk Register
 
-1. **Contract first:** Define interfaces before parallel implementation.
-2. **Mock first:** Make the complete workflow work without external services.
-3. **Safety first:** Enforce confirmation and command validation on the backend.
-4. **Modular design:** Keep routes, workflow logic, command validation, and adapters separate.
-5. **Accessible by design:** Treat Urdu/RTL and visual feedback as core requirements.
-6. **Test continuously:** Validate each integration milestone instead of waiting until Day 7.
-7. **Freeze early:** Reserve the final two days for stabilization, setup verification, and demonstration.
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| LLM Urdu output poor | High | Medium | Fallback to English-internal/Urdu-display |
+| Can't recruit DHH participants | Medium | High | Start recruitment immediately Sunday morning via personal networks; have hearing bilingual pilot as backup |
+| Groq rate limit hit | Low | Low | 14,400/day is plenty; have OpenRouter backup |
+| Gradio bugs | Medium | Medium | Keep UI simple; no custom CSS |
+| Team member unavailable | Low | High | Cross-train: everyone knows how to run the app and the session protocol |
+| Internet outage during session | Medium | High | Pre-cache LLM responses as JSON; run offline mode |
+
+---
+
+## 10. Communication Protocol
+
+- **WhatsApp group:** Daily standup at 9 AM and 9 PM (5 min each)
+- **GitHub:** Push code every 4 hours. Commit messages in English.
+- **Shared Google Drive:** For questionnaires, transcripts, and drafts
+- **Decision rule:** If a feature takes >2 hours to build and isn't in the "In Scope" list, cut it. Ship the MVP.
