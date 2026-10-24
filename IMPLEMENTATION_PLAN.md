@@ -49,7 +49,7 @@ We build **only the LLM-assisted touch interface condition** from the original p
 ## 3. Directory Structure
 
 ```text
-urdu-ipa-project/
+project/
 │
 ├── README.md                    # Setup + run instructions
 ├── requirements.txt             # gradio, groq, pandas, python-dotenv

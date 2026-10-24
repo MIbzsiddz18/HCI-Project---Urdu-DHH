@@ -27,4 +27,3 @@ This project builds a Gradio web app that simulates a smart home assistant inter
 
 ```bash
 git clone <your-repo-url>
-cd urdu-ipa-project
