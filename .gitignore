@@ -9,4 +9,5 @@ data/transcripts/*
 !data/transcripts/.gitkeep
 *.pdf
 !questionnaires/*.pdf
+!output/pdf/*.pdf
 .DS_Store
