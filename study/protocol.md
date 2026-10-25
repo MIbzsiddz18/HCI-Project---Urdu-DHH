@@ -24,10 +24,11 @@ The session follows this flow: consent, pre-survey, 5-minute exploration, five s
    - demographic survey
    - SUS questionnaire
    - note-taking sheet or digital log
-4. Check that the app is working and that the smart-home state is reset before each participant.
+4. Check that the app is working and that the smart-home state is reset before each participant. Use the app's **Reset session and home** control between participants and confirm the data output directory is writable.
 5. Confirm that the participant’s preferred communication mode is available (Urdu text, English text, sign support, or interpreter if needed).
 6. If recording is used, confirm informed consent before starting audio/video capture.
 7. Keep the session log ready for recording completion time, errors, help requests, and qualitative notes.
+8. Assign a participant code (for example, P01). Do not enter the participant's name in the app.
 
 ---
 
@@ -71,7 +72,7 @@ Important reminder:
 ### 3. Pre-session demographic and background survey
 Estimated time: 4 minutes
 
-1. Provide the demographic questionnaire and ask the participant to complete it.
+1. Enter the participant code and demographic answers in the app, confirm consent, and start the session. Also provide the demographic questionnaire and ask the participant to complete it.
 2. Use the standard form from the project’s demographic survey to collect:
    - age
    - gender
@@ -105,7 +106,7 @@ Example script:
 ### 5. Five-minute exploration phase
 Estimated time: 5 minutes
 
-1. Start the app and allow the participant to explore freely without any timed tasks.
+1. Allow the participant to explore freely without any timed tasks. Start the logged session after exploration; the app then presents the five timed tasks in order.
 2. Encourage them to click, read, and navigate the interface naturally.
 3. Observe whether they understand the layout, wording, and next steps.
 4. Do not give instructions on how to complete specific tasks during this phase.
@@ -125,11 +126,12 @@ Estimated time: 2 minutes
 Task goal: Ask the system to check today’s weather in Lahore.
 
 Instructions:
-1. Say: “Please complete the following task using the app: check today’s weather in Lahore.”
+1. Read the task currently shown in the app: “Please complete the following task using the app: check today’s weather in Lahore.”
 2. Allow the participant to navigate independently.
 3. Observe whether they identify the correct action and whether the Urdu/English wording supports comprehension.
 4. If the participant gets stuck, wait briefly before offering a neutral prompt such as: “Please use the app as you would normally.”
 5. Record whether the task was completed successfully and whether the participant needed help.
+6. Confirm the simulated command only after the participant chooses a suggestion. If the participant cannot complete the task, use **Could not complete** so the outcome and latency are recorded accurately.
 
 Expected state/action: weather information for Lahore should appear in the interface.
 
@@ -203,6 +205,7 @@ Estimated time: 4 minutes
 3. If needed, read the items aloud or explain terms without suggesting how to answer.
 4. Encourage the participant to answer based on their actual experience with the app.
 5. Record the final SUS score and note any missing or unclear responses.
+6. Enter the 10 item responses, adjective rating (1–7), and NPS response (0–10) in the app. Each entry is saved automatically.
 
 Instructions for the researcher:
 - Do not interpret the questions for them.
@@ -224,6 +227,7 @@ Estimated time: 5 minutes
 3. Use optional probes only when necessary.
 4. Encourage the participant to speak in their preferred language or communication mode.
 5. Record responses in notes or, with permission, an audio recording.
+6. Enter brief notes for each interview question in the app. Audio is not captured by the app and must be stored separately under the participant code.
 
 Interview prompts:
 - “Can you give an example?”
@@ -245,6 +249,7 @@ Estimated time: 2 minutes
 3. Ask whether they would like a summary of the results once the study is complete.
 4. Confirm that they have no additional questions.
 5. End the session and log the final notes in the participant session file.
+6. Select **Save and finish session** in the app, then confirm the session was saved before resetting for the next participant.
 
 Example closing script:
 > “Thank you for your time and honest feedback. Your responses will help us improve the app for Pakistani Deaf and Hard of Hearing users. We appreciate your contribution.”

@@ -1,0 +1,1 @@
+session_id,participant_id,condition,task_id,task_order,task_goal_english,task_goal_urdu,status,task_started_at,task_ended_at,latency_seconds,action_verb_english,selected_option_urdu,command,llm_model,llm_latency_seconds,llm_used_fallback,llm_error

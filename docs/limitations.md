@@ -69,11 +69,11 @@ In addition, a simulated smart-home interface may not fully capture the practica
 
 ---
 
-## 6. LLM latency and GPT-4o variability
+## 6. Groq model latency and output variability
 
-The study depends on a language model to generate or facilitate suggestions in real time. LLM response latency can vary due to network conditions, model load, prompt structure, and system-level stochasticity. This introduces uncertainty in task completion time and may influence user perception of responsiveness, especially in a touch-based interactive setting.
+The study depends on Groq-hosted language-model inference to generate Urdu suggestions in real time. Response latency can vary due to network conditions, model load, prompt structure, and service limits. This introduces uncertainty in task completion time and may influence user perception of responsiveness, especially in a touch-based interactive setting.
 
-Furthermore, the quality of model output may vary across prompts, languages, or conversation context. In a multilingual or cross-modal study involving Urdu, English, and DHH communication preferences, variability in output quality can affect both usability and user trust. This limits the reproducibility of the findings and complicates comparisons across participants or sessions.
+Furthermore, the quality of model output may vary across prompts, languages, or conversation context. In a multilingual study involving Urdu, English, and DHH communication preferences, variability in output quality can affect both usability and user trust. This limits the reproducibility of the findings and complicates comparisons across participants or sessions. Local fallback suggestions may appear when the API is unavailable or returns unusable output; those interactions should be flagged when interpreting results.
 
 ### Mitigation / future work
 - Log model latency, token usage, and response quality for each interaction.

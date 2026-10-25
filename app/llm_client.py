@@ -11,11 +11,12 @@ except ImportError:  # pragma: no cover - script execution path
     import prompts
     import translations
 
-MODEL = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
+MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
 _client = None
 LAST_ERROR = None
 LAST_RAW_RESPONSE = None
 LAST_PARSE_USED_FALLBACK = False
+LAST_LATENCY_SECONDS = None
 
 
 def _get_client():
@@ -54,10 +55,11 @@ def _home_text(home_env):
 
 def _complete(template, fallback, *, json_mode=False, **values):
     """Call Groq, returning parsed content or fallback on any service issue."""
-    global LAST_ERROR, LAST_RAW_RESPONSE, LAST_PARSE_USED_FALLBACK
+    global LAST_ERROR, LAST_RAW_RESPONSE, LAST_PARSE_USED_FALLBACK, LAST_LATENCY_SECONDS
     LAST_ERROR = None
     LAST_RAW_RESPONSE = None
     LAST_PARSE_USED_FALLBACK = False
+    LAST_LATENCY_SECONDS = None
     prompt = template.format(**values)
     started = time.perf_counter()
     try:
@@ -83,10 +85,12 @@ def _complete(template, fallback, *, json_mode=False, **values):
         )
         content = response.choices[0].message.content or ""
         LAST_RAW_RESPONSE = content.strip()
-        return content.strip(), (time.perf_counter() - started)
+        LAST_LATENCY_SECONDS = time.perf_counter() - started
+        return content.strip(), LAST_LATENCY_SECONDS
     except Exception as exc:
         LAST_ERROR = f"{type(exc).__name__}: {exc}"
-        return fallback, (time.perf_counter() - started)
+        LAST_LATENCY_SECONDS = time.perf_counter() - started
+        return fallback, LAST_LATENCY_SECONDS
 
 
 def get_backend_status():
@@ -185,5 +189,5 @@ def build_final_command(task, question=None, answer=None):
 
 
 def get_last_latency_seconds():
-    """Reserved for UI callers; per-request latency is measured by the app."""
-    return None
+    """Return the duration of the most recent API attempt, in seconds."""
+    return LAST_LATENCY_SECONDS

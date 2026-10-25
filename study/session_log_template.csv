@@ -1,2 +1,2 @@
-participant_id,date,age,gender,hearing_status,hearing_device,language_background,prior_ipa_experience,task_completion_rate,mean_latency_seconds,sus_score,adjective_score,nps_score,session_notes
+session_id,participant_id,condition,status,started_at,ended_at,age,gender,hearing_status,hearing_device,language_background,prior_ipa_experience,voice_assistant_frequency,accessibility_needs,consent_confirmed,task_completion_rate,completed_tasks,total_tasks,mean_latency_seconds,q1,q2,q3,q4,q5,q6,q7,q8,q9,q10,sus_score,adjective_score,nps_score,interview_1,interview_2,interview_3,interview_4,interview_5,session_notes
 
