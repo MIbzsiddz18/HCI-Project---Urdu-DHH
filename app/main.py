@@ -32,20 +32,264 @@ ACTION_VERBS = [
 ]
 
 APP_CSS = """
-:root { --ink:#183330; --teal:#0d5d56; --teal-dark:#08453f; --paper:#f4f3ec; --border:#c8d4ce; }
-body,.gradio-container { background:var(--paper)!important; color:var(--ink)!important; font-family:"Noto Naskh Arabic","Noto Nastaliq Urdu","Segoe UI",Tahoma,sans-serif!important; font-size:18px!important; line-height:1.65!important; }
-.gradio-container { max-width:1240px!important; margin:0 auto!important; padding:22px!important; }
-.gradio-container h1,.gradio-container h2,.gradio-container h3 { color:var(--teal-dark)!important; line-height:1.4!important; }
-.study-card { border:1px solid var(--border)!important; border-radius:18px!important; background:#fff!important; padding:20px!important; box-shadow:0 4px 16px rgba(24,51,48,.07)!important; }
-.choice-grid>.row { display:grid!important; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px!important; }
-.choice-grid button { width:100%!important; min-width:0!important; height:138px!important; min-height:138px!important; padding:12px!important; border:2px solid #aebfb8!important; border-bottom:6px solid #879e95!important; border-radius:14px!important; background:linear-gradient(180deg,#fff 0%,#f2f6f3 100%)!important; color:var(--ink)!important; font-size:1rem!important; font-weight:650!important; line-height:1.5!important; white-space:pre-line!important; overflow-wrap:anywhere; unicode-bidi:plaintext; box-shadow:0 3px 7px rgba(24,51,48,.13)!important; }
-.choice-grid button:hover { border-color:var(--teal)!important; background:#e7f3ee!important; }
-.primary-action button { min-height:58px!important; border-radius:12px!important; background:var(--teal)!important; color:#fff!important; font-weight:700!important; }
-.primary-action button:hover { background:var(--teal-dark)!important; }
-.study-state textarea,.study-history textarea { min-height:200px!important; border:2px solid var(--border)!important; border-radius:12px!important; background:#fbfcfa!important; color:var(--ink)!important; font-family:inherit!important; line-height:1.7!important; unicode-bidi:plaintext; }
-.gradio-container button:focus-visible,.gradio-container textarea:focus-visible,.gradio-container input:focus-visible { outline:4px solid #b65a37!important; outline-offset:3px!important; }
-@media(max-width:720px){.gradio-container{padding:12px!important}.choice-grid>.row{grid-template-columns:repeat(2,minmax(0,1fr))}.choice-grid button{height:128px!important;min-height:128px!important;padding:8px!important;font-size:.94rem!important}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important}}
+/* Visual design for the bilingual DHH study UI.
+   Rules never set `display` on components Gradio toggles with `.hidden`,
+   so visibility stays controlled by the Python handlers. */
+:root, .gradio-container, .dark .gradio-container {
+  color-scheme: light;
+  --canvas: #eef2f1;
+  --surface: #ffffff;
+  --surface-tint: #e5f2ef;
+  --readout: #f4f7f6;
+  --ink: #15232a;
+  --muted: #56656c;
+  --line: #d5dfdd;
+  --accent: #0b6b66;
+  --accent-pressed: #08524e;
+  --accent-ring: #7cc2b9;
+  --preview: #fff7e6;
+  --preview-line: #f0cf8a;
+  --preview-ink: #7a4f00;
+  --danger: #a8322b;
+  --danger-line: #e6c3c0;
+  --danger-tint: #fbeceb;
+  --focus: #d4651c;
+  --radius-card: 20px;
+  --radius-control: 12px;
+  --shadow-1: 0 1px 2px rgba(14,44,41,.06), 0 2px 8px rgba(14,44,41,.04);
+  --shadow-2: 0 1px 2px rgba(14,44,41,.06), 0 8px 24px rgba(14,44,41,.07);
+  --font-mix: "Atkinson Hyperlegible","Noto Nastaliq Urdu","Jameel Noori Nastaleeq","Urdu Typesetting","Segoe UI",system-ui,sans-serif;
+  --font-urdu: "Noto Nastaliq Urdu","Jameel Noori Nastaleeq","Urdu Typesetting","Segoe UI",serif;
+  /* Pin Gradio theme variables to the light palette, even if the OS is in dark mode. */
+  --body-background-fill: var(--canvas) !important;
+  --background-fill-primary: var(--surface) !important;
+  --background-fill-secondary: var(--readout) !important;
+  --block-background-fill: var(--surface) !important;
+  --input-background-fill: #ffffff !important;
+  --body-text-color: var(--ink) !important;
+  --body-text-color-subdued: var(--muted) !important;
+  --block-label-text-color: var(--muted) !important;
+  --block-title-text-color: var(--ink) !important;
+  --border-color-primary: var(--line) !important;
+  --block-border-color: var(--line) !important;
+  --color-accent: var(--accent) !important;
+  --color-accent-soft: var(--surface-tint) !important;
+}
+body, .gradio-container {
+  background: var(--canvas) !important;
+  color: var(--ink) !important;
+  font-family: var(--font-mix) !important;
+  font-size: 16px !important;
+  line-height: 1.6 !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.gradio-container { max-width: 1360px !important; margin: 0 auto !important; padding: 16px 24px 24px !important; }
+.gradio-container > .main, .gradio-container .main > .wrap { gap: 14px !important; }
+.gradio-container h1, .gradio-container h2, .gradio-container h3, .gradio-container h4 {
+  color: var(--ink) !important; text-wrap: balance;
+}
+.gradio-container p { color: var(--muted); text-wrap: pretty; }
+
+/* Header: compact so the task and choices stay above the fold on a 1366x768 laptop */
+.block.app-header { padding: 0 4px !important; }
+.app-header h1 { font-size: 1.3rem !important; font-weight: 700 !important; line-height: 1.9 !important; letter-spacing: -.01em; margin: 0 !important; }
+.app-header p { font-size: .92rem !important; margin: 0 !important; }
+
+/* Two-column layout; the sidebar stays in view while the main column scrolls */
+.app-layout { align-items: flex-start !important; gap: 18px !important; }
+.side-col { position: sticky; top: 12px; align-self: flex-start !important; }
+
+/* Cards: shadows give elevation, borders only mark state */
+.study-card {
+  border: 0 !important; border-radius: var(--radius-card) !important;
+  background: var(--surface) !important; padding: 20px 22px !important;
+  box-shadow: var(--shadow-2) !important; overflow: visible !important;
+}
+.study-card > *, .study-card .form { gap: 14px !important; }
+.study-card .form, .study-card .block { border: 0 !important; box-shadow: none !important; background: transparent !important; }
+.study-card > .styler { background: transparent !important; }
+.study-card .block.padded { padding: 4px 0 !important; }
+/* Gradio wraps adjacent inputs in a .form whose background acts as a divider colour; open it up into spaced fields */
+.gradio-container .form { background: transparent !important; border: 0 !important; box-shadow: none !important; gap: 12px !important; overflow: visible !important; }
+.gradio-container .form > .block { border-radius: 0 !important; }
+.welcome-head h3 { font-size: 1.25rem !important; margin: 0 0 4px !important; }
+.welcome-head p { font-size: .94rem !important; max-width: 70ch; }
+
+/* Task card: progress eyebrow, Urdu instruction dominant and right-to-left */
+.block.task-card {
+  background: var(--surface) !important; border-radius: var(--radius-card) !important;
+  box-shadow: var(--shadow-2) !important; padding: 14px 22px 16px !important; border: 0 !important;
+}
+.task-card h3 {
+  font-size: .8rem !important; font-weight: 700 !important; letter-spacing: .06em !important;
+  text-transform: uppercase; color: var(--accent) !important; margin: 0 0 2px !important;
+  font-variant-numeric: tabular-nums; line-height: 2 !important;
+}
+.task-card p { margin: 0 !important; }
+.task-card p:nth-of-type(1) {
+  direction: rtl; text-align: right; font-family: var(--font-urdu) !important;
+  font-size: 1.55rem !important; line-height: 2.15 !important; color: var(--ink) !important;
+}
+.task-card p:nth-of-type(2) { font-size: 1.05rem !important; color: var(--muted) !important; }
+.task-card strong { font-family: var(--font-mix); font-size: .8rem; font-weight: 700; color: var(--muted); margin-inline-end: 6px; }
+.stage-heading { padding: 0 4px !important; }
+.stage-heading h3 { font-size: 1.02rem !important; font-weight: 700 !important; margin: 0 !important; line-height: 2 !important; }
+
+/* Choice tiles: large, evenly spaced targets; Urdu line first and larger */
+.choice-grid { gap: 12px !important; }
+.choice-grid > .row { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px !important; }
+.choice-grid > .row:not(:has(button:not(.hidden))) { display: none !important; }
+.choice-grid button:not(.hidden) {
+  display: block !important; width: 100% !important; min-width: 0 !important;
+  min-height: 92px !important; height: auto !important; padding: 10px 14px !important;
+  border: 1.5px solid transparent !important; border-radius: 16px !important;
+  background: var(--surface) !important; color: var(--ink) !important;
+  font-family: var(--font-mix) !important; font-size: 1rem !important; font-weight: 700 !important;
+  line-height: 1.85 !important; text-align: center !important;
+  white-space: pre-line !important; overflow-wrap: anywhere; unicode-bidi: plaintext;
+  box-shadow: var(--shadow-1) !important; cursor: pointer;
+  transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease, transform .1s ease-out !important;
+  -webkit-tap-highlight-color: transparent;
+}
+.choice-grid button::first-line { font-family: var(--font-urdu); font-size: 1.3em; font-weight: 600; }
+.choice-grid button:hover { border-color: var(--accent-ring) !important; box-shadow: var(--shadow-2) !important; }
+.choice-grid button:active { transform: scale(.96); background: var(--surface-tint) !important; border-color: var(--accent) !important; }
+
+/* Buttons */
+.gradio-container button { -webkit-tap-highlight-color: transparent; }
+.primary-action button, .gradio-container button.primary, .gradio-container button.btn-next {
+  min-height: 54px !important; padding: 10px 22px !important; border: 0 !important; border-radius: 14px !important;
+  background: var(--accent) !important; color: #fff !important; font-weight: 700 !important; font-size: 1.04rem !important;
+  box-shadow: 0 1px 2px rgba(11,107,102,.3), 0 4px 12px rgba(11,107,102,.18) !important;
+  transition: background-color .15s ease, transform .1s ease-out !important;
+}
+.primary-action button:hover, .gradio-container button.primary:hover, .gradio-container button.btn-next:hover { background: var(--accent-pressed) !important; }
+.primary-action button:active, .gradio-container button.primary:active, .gradio-container button.btn-next:active,
+.gradio-container button.btn-quiet:active, .gradio-container button.stop:active { transform: scale(.96); }
+.gradio-container button.btn-quiet {
+  min-height: 52px !important; padding: 10px 20px !important; border-radius: 14px !important;
+  background: transparent !important; color: var(--muted) !important; font-weight: 700 !important;
+  border: 1.5px solid var(--line) !important; box-shadow: none !important;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .1s ease-out !important;
+}
+.gradio-container button.btn-quiet:hover { background: var(--surface) !important; color: var(--ink) !important; border-color: #b9c6c3 !important; }
+.gradio-container button.stop {
+  min-height: 48px !important; border-radius: 12px !important; width: 100%;
+  background: transparent !important; color: var(--danger) !important; font-weight: 700 !important;
+  border: 1.5px solid var(--danger-line) !important; box-shadow: none !important;
+  transition: background-color .15s ease, transform .1s ease-out !important;
+}
+.gradio-container button.stop:hover { background: var(--danger-tint) !important; }
+
+/* Task action row: secondary action at natural width, primary action fills the rest */
+.task-actions { justify-content: flex-end !important; gap: 12px !important; align-items: stretch !important; }
+.task-actions > .column:not(:has(button:not(.hidden))) { display: none !important; }
+.task-actions > button.btn-quiet { flex: 0 0 auto !important; flex-grow: 0 !important; width: auto !important; }
+
+/* Confirmation summary */
+.confirm-box textarea {
+  background: var(--surface-tint) !important; border: 0 !important; border-radius: 12px !important;
+  font-size: 1.02rem !important; line-height: 2 !important; color: var(--ink) !important;
+  padding: 12px 16px !important; resize: none !important; unicode-bidi: plaintext;
+}
+.confirm-box { background: var(--surface) !important; border-radius: var(--radius-card) !important; box-shadow: var(--shadow-2) !important; padding: 14px 18px 16px !important; border: 0 !important; }
+
+/* Form controls */
+.gradio-container label > span, .gradio-container [data-testid="block-info"] {
+  color: #33434a !important; font-weight: 700 !important; font-size: .88rem !important;
+  background: transparent !important; padding: 0 !important; box-shadow: none !important;
+}
+.gradio-container input, .gradio-container textarea, .gradio-container [role="listbox"], .gradio-container select {
+  border: 1.5px solid var(--line) !important; border-radius: var(--radius-control) !important;
+  background: #fff !important; color: var(--ink) !important; box-shadow: none !important;
+  font: inherit !important; min-height: 48px;
+  transition: border-color .15s ease, box-shadow .15s ease !important;
+}
+.gradio-container input:focus, .gradio-container textarea:focus {
+  border-color: var(--accent) !important; box-shadow: 0 0 0 4px rgba(11,107,102,.14) !important;
+}
+.gradio-container textarea { line-height: 1.75 !important; }
+/* Dropdowns: the outer wrapper is the field; the inner input stays borderless */
+.gradio-container .wrap:has(> .wrap-inner) {
+  border: 1.5px solid var(--line) !important; border-radius: var(--radius-control) !important;
+  background: #fff !important; box-shadow: none !important; min-height: 48px;
+  transition: border-color .15s ease, box-shadow .15s ease !important;
+}
+.gradio-container .wrap:has(> .wrap-inner):focus-within { border-color: var(--accent) !important; box-shadow: 0 0 0 4px rgba(11,107,102,.14) !important; }
+.gradio-container .wrap-inner input { border: 0 !important; min-height: 0 !important; background: transparent !important; box-shadow: none !important; }
+.gradio-container .wrap-inner input:focus { box-shadow: none !important; }
+.gradio-container input::placeholder, .gradio-container textarea::placeholder { color: #7d898e !important; }
+.gradio-container input[type="number"] { font-variant-numeric: tabular-nums; }
+.gradio-container input[type="checkbox"] { min-height: 0 !important; width: 24px !important; height: 24px !important; border-radius: 7px !important; accent-color: var(--accent); }
+.consent-row { background: var(--surface-tint) !important; border-radius: 14px !important; padding: 12px 16px !important; }
+.consent-row label { gap: 12px !important; align-items: center !important; font-weight: 700 !important; color: var(--ink) !important; min-height: 32px; }
+
+/* Sidebar */
+.side-heading h3 { font-size: .98rem !important; font-weight: 700 !important; margin: 0 !important; line-height: 2 !important; }
+.study-state textarea, .study-history textarea {
+  border: 0 !important; border-radius: 12px !important; background: var(--readout) !important;
+  color: #22323a !important; font-family: var(--font-mix) !important; font-size: .92rem !important;
+  line-height: 1.95 !important; unicode-bidi: plaintext; resize: none !important;
+  font-variant-numeric: tabular-nums; padding: 10px 14px !important;
+}
+.study-state textarea { min-height: 200px !important; }
+.study-history textarea { min-height: 140px !important; font-size: .85rem !important; color: var(--muted) !important; }
+/* While the Confirm button is on screen, the home panel shows a preview: mark it amber (the label text also says so). */
+.gradio-container:has(button.confirm-btn:not(.hidden)) .study-state textarea {
+  background: var(--preview) !important; box-shadow: inset 0 0 0 1.5px var(--preview-line) !important;
+}
+.gradio-container:has(button.confirm-btn:not(.hidden)) .study-state [data-testid="block-info"] { color: var(--preview-ink) !important; }
+.study-card .block.status-note { background: var(--surface-tint) !important; border-radius: 12px !important; padding: 10px 12px 10px 30px !important; position: relative; margin-top: 4px; }
+.study-card .block.status-note::before { content: ""; position: absolute; left: 13px; top: 19px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px rgba(11,107,102,.18); }
+.status-note p { color: #1f4a44 !important; font-size: .86rem !important; line-height: 1.6 !important; margin: 0 !important; }
+
+/* Questionnaire */
+.gradio-container .accordion, .survey-panel {
+  border: 0 !important; border-radius: var(--radius-card) !important; background: #fff !important;
+  box-shadow: var(--shadow-2) !important; overflow: hidden;
+}
+.gradio-container .label-wrap { margin-bottom: 6px !important; font-weight: 700 !important; font-size: 1.04rem !important; }
+.survey-section { background: #f6f9f8 !important; border-radius: 14px !important; padding: 12px 14px !important; gap: 10px !important; }
+.survey-section h4 { font-size: .92rem !important; margin: 0 !important; }
+.survey-section input { font-variant-numeric: tabular-nums; }
+.survey-section .row, .survey-section .row > .form { flex-wrap: nowrap !important; }
+.survey-section .block { min-width: 0 !important; background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 2px 0 !important; }
+.survey-panel .label-wrap span { font-size: 1.04rem !important; font-weight: 700 !important; color: var(--ink) !important; }
+.interview-grid:not(:has(> .form)), .interview-grid > .form {
+  display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px !important;
+  border: 0 !important; background: transparent !important; box-shadow: none !important;
+}
+
+/* Keyboard focus: orange, distinct from the teal selection colour */
+.gradio-container button:focus-visible, .gradio-container textarea:focus-visible,
+.gradio-container input:focus-visible, .gradio-container [role="listbox"]:focus-visible {
+  outline: 3px solid var(--focus) !important; outline-offset: 3px !important;
+}
+
+/* Tablet landscape (about 1024-1180px) */
+@media (max-width: 1180px) {
+  .gradio-container { padding: 14px 18px 20px !important; }
+  .choice-grid button:not(.hidden) { min-height: 96px !important; }
+}
+@media (max-width: 900px) {
+  .study-card, .task-card { padding: 16px !important; }
+  .side-col { position: static; }
+  .interview-grid:not(:has(> .form)), .interview-grid > .form { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .gradio-container { padding: 12px !important; }
+  .choice-grid > .row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px !important; }
+  .choice-grid button:not(.hidden) { min-height: 88px !important; padding: 10px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  .choice-grid button:active, .gradio-container button:active { transform: none !important; }
+}
+@media (prefers-contrast: more) {
+  .study-card, .task-card, .confirm-box, .gradio-container .accordion { box-shadow: 0 0 0 1.5px var(--ink) !important; }
+  .choice-grid button:not(.hidden) { border-color: var(--ink) !important; }
+}
 """
 
 
@@ -402,22 +646,33 @@ def _clear_form_updates():
 def build_app():
     with gr.Blocks(
         title="Urdu Smart Home Assistant",
-        theme=gr.themes.Soft(primary_hue="teal", neutral_hue="stone"),
+        theme=gr.themes.Soft(
+            primary_hue="teal",
+            neutral_hue="stone",
+            font=[
+                gr.themes.GoogleFont("Atkinson Hyperlegible", weights=(400, 700)),
+                gr.themes.GoogleFont("Noto Nastaliq Urdu", weights=(400, 600, 700)),
+                gr.themes.Font("Segoe UI"),
+                gr.themes.Font("sans-serif"),
+            ],
+        ),
         css=APP_CSS,
     ) as demo:
         gr.Markdown(
             "# Urdu Smart Home Assistant | اردو اسمارٹ ہوم اسسٹنٹ\n"
-            "A touch-based, bilingual smart-home simulation for the usability study."
+            "A touch-based, bilingual smart-home simulation for the usability study.",
+            elem_classes=["app-header"],
         )
         flow = gr.State(_initial_flow())
 
-        with gr.Row():
-            with gr.Column(scale=2):
+        with gr.Row(elem_classes=["app-layout"]):
+            with gr.Column(scale=2, min_width=520, elem_classes=["main-col"]):
                 with gr.Group(elem_classes=["study-card"]) as welcome_panel:
                     gr.Markdown(
                         "### Welcome / خوش آمدید\n"
                         "The app will present the five study tasks in order. The researcher should give the participant the same task shown on screen. "
-                        "No participant name is collected; use a study code."
+                        "No participant name is collected; use a study code.",
+                        elem_classes=["welcome-head"],
                     )
                     with gr.Row():
                         participant_id = gr.Textbox(label="Participant code / شرکاء کا کوڈ", placeholder="P01")
@@ -432,12 +687,12 @@ def build_app():
                         language_background = gr.Textbox(label="Preferred languages / پسندیدہ زبانیں", placeholder="Urdu, English, PSL, other")
                         voice_assistant_frequency = gr.Textbox(label="Frequency / استعمال کی تعداد", placeholder="Daily, weekly, rarely, never")
                     accessibility_needs = gr.Textbox(label="Accessibility needs / رسائی کی ضروریات", lines=2)
-                    consent_confirmed = gr.Checkbox(label="Consent was completed before starting / سیشن سے پہلے رضامندی لی گئی ہے", value=False)
+                    consent_confirmed = gr.Checkbox(label="Consent was completed before starting / سیشن سے پہلے رضامندی لی گئی ہے", value=False, elem_classes=["consent-row"])
                     with gr.Row(elem_classes=["primary-action"]):
                         start_button = gr.Button("Start session / سیشن شروع کریں", variant="primary")
 
-                task_prompt = gr.Markdown(visible=False)
-                stage_heading = gr.Markdown(visible=False)
+                task_prompt = gr.Markdown(visible=False, elem_classes=["task-card"])
+                stage_heading = gr.Markdown(visible=False, elem_classes=["stage-heading"])
                 choice_buttons = []
                 with gr.Column(elem_classes=["choice-grid"]):
                     for _ in range(3):
@@ -445,21 +700,22 @@ def build_app():
                             for _ in range(3):
                                 choice_buttons.append(gr.Button(visible=False))
 
-                confirmation_box = gr.Textbox(label="Confirmation / تصدیق", lines=4, interactive=False, visible=False)
-                with gr.Row():
+                confirmation_box = gr.Textbox(label="Confirmation / تصدیق", lines=4, interactive=False, visible=False, elem_classes=["confirm-box"])
+                with gr.Row(elem_classes=["task-actions"]):
                     with gr.Column(elem_classes=["primary-action"]):
-                        confirm_button = gr.Button("Confirm / تصدیق کریں", variant="primary", visible=False)
-                    fail_button = gr.Button("Could not complete / مکمل نہیں ہوا", visible=False)
-                    next_task_button = gr.Button("Next task / اگلا کام", visible=False)
+                        confirm_button = gr.Button("Confirm / تصدیق کریں", variant="primary", visible=False, elem_classes=["confirm-btn"])
+                    fail_button = gr.Button("Could not complete / مکمل نہیں ہوا", visible=False, elem_classes=["btn-quiet"])
+                    next_task_button = gr.Button("Next task / اگلا کام", visible=False, elem_classes=["btn-next"])
 
-                with gr.Accordion("Questionnaire and interview / سوالنامہ اور انٹرویو", open=True, visible=False) as questionnaire_panel:
+                with gr.Accordion("Questionnaire and interview / سوالنامہ اور انٹرویو", open=True, visible=False, elem_classes=["survey-panel"]) as questionnaire_panel:
                     gr.Markdown("Complete these entries after the participant finishes all five tasks. Responses save automatically as they are entered.")
-                    gr.Markdown("#### SUS — choose 1 (strongly disagree) to 5 (strongly agree) for each item")
                     sus_inputs = []
-                    for start in (1, 6):
-                        with gr.Row():
-                            for item in range(start, start + 5):
-                                sus_inputs.append(gr.Dropdown(label=f"SUS {item}", choices=[1, 2, 3, 4, 5], value=None))
+                    with gr.Column(elem_classes=["survey-section"]):
+                        gr.Markdown("#### SUS — choose 1 (strongly disagree) to 5 (strongly agree) for each item")
+                        for start in (1, 6):
+                            with gr.Row():
+                                for item in range(start, start + 5):
+                                    sus_inputs.append(gr.Dropdown(label=f"SUS {item}", choices=[1, 2, 3, 4, 5], value=None))
                     with gr.Row():
                         adjective_input = gr.Dropdown(label="Overall adjective rating (1–7)", choices=list(range(1, 8)), value=None)
                         nps_input = gr.Dropdown(label="NPS likelihood (0–10)", choices=list(range(0, 11)), value=None)
@@ -468,19 +724,20 @@ def build_app():
                         "Easiest / hardest part", "Urdu wording and translations", "AI privacy concerns",
                         "Interest in hands-free voice/sign options", "Suggested improvement",
                     ]
-                    for label in interview_labels:
-                        interview_inputs.append(gr.Textbox(label=f"Interview notes — {label}", lines=2))
+                    with gr.Column(elem_classes=["interview-grid"]):
+                        for label in interview_labels:
+                            interview_inputs.append(gr.Textbox(label=f"Interview notes — {label}", lines=2))
                     session_notes = gr.Textbox(label="Researcher session notes / محقق کے نوٹس", lines=3)
                     with gr.Row(elem_classes=["primary-action"]):
                         finish_button = gr.Button("Save and finish session / محفوظ کرکے ختم کریں", variant="primary")
 
-            with gr.Column(scale=1):
+            with gr.Column(scale=1, min_width=300, elem_classes=["side-col"]):
                 with gr.Group(elem_classes=["study-card"]):
-                    gr.Markdown("### Home status / گھر کی حالت")
+                    gr.Markdown("### Home status / گھر کی حالت", elem_classes=["side-heading"])
                     state_display = gr.Textbox(value=get_state_display(), label="Simulated state / فرضی حالت", lines=9, interactive=False, elem_classes=["study-state"])
-                    gr.Markdown("### Selections / انتخاب")
+                    gr.Markdown("### Selections / انتخاب", elem_classes=["side-heading"])
                     history_display = gr.Textbox(value="No selections yet.", label="Session history", lines=9, interactive=False, elem_classes=["study-history"])
-                    data_status = gr.Markdown("Session data has not been started.")
+                    data_status = gr.Markdown("Session data has not been started.", elem_classes=["status-note"])
                     reset_button = gr.Button("Reset session and home / سیشن اور گھر ری سیٹ کریں", variant="stop", visible=False)
 
         view_components = [

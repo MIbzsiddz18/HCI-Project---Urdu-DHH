@@ -11,3 +11,4 @@ data/transcripts/*
 !questionnaires/*.pdf
 !output/pdf/*.pdf
 .DS_Store
+mockups/
