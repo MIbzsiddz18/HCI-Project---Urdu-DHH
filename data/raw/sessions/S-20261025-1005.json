@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "session_id": "S-20261025-1005",
+  "participant_id": "P05",
+  "condition": "llm_touch",
+  "status": "complete",
+  "started_at": "2026-10-25T10:15:00+05:00",
+  "ended_at": "2026-10-25T10:23:11+05:00",
+  "demographics": {
+    "age": 73,
+    "gender": "Woman",
+    "hearing_status": "Deaf",
+    "hearing_device": "Prefer not to say",
+    "language_background": "Urdu, Saraiki, Pakistan Sign Language (PSL)",
+    "prior_ipa_experience": "No",
+    "voice_assistant_frequency": "Never",
+    "accessibility_needs": "Large touch targets; no spoken instructions; familiar Urdu phrasing.",
+    "consent_confirmed": true
+  },
+  "tasks": [
+    {"task_id": "weather_lahore", "task_order": 1, "status": "complete", "latency_seconds": 56.912, "command": "check weather in Lahore"},
+    {"task_id": "tea_timer_5",    "task_order": 2, "status": "complete", "latency_seconds": 48.168, "command": "set timer for 5 minutes"},
+    {"task_id": "light_blue",     "task_order": 3, "status": "complete", "latency_seconds": 63.184, "command": "set light color to blue"},
+    {"task_id": "biryani_recipe", "task_order": 4, "status": "failed", "latency_seconds": 51.640, "command": ""},
+    {"task_id": "fajr_reminder",  "task_order": 5, "status": "complete", "latency_seconds": 67.888, "command": "set Fajr reminder"}
+  ],
+  "questionnaire": {
+    "sus_responses": {"q1":3,"q2":4,"q3":3,"q4":3,"q5":4,"q6":3,"q7":3,"q8":4,"q9":3,"q10":3},
+    "adjective_score": 4,
+    "nps_score": 6
+  },
+  "events": [
+    {"timestamp":"2026-10-25T10:15:00+05:00","event":"session_started","details":{"consent_confirmed":true}},
+    {"timestamp":"2026-10-25T10:15:00+05:00","event":"task_started","details":{"task_id":"weather_lahore","task_order":1}},
+    {"timestamp":"2026-10-25T10:15:57+05:00","event":"task_completed","details":{"task_id":"weather_lahore","latency_seconds":56.912}},
+    {"timestamp":"2026-10-25T10:16:15+05:00","event":"task_started","details":{"task_id":"tea_timer_5","task_order":2}},
+    {"timestamp":"2026-10-25T10:17:03+05:00","event":"task_completed","details":{"task_id":"tea_timer_5","latency_seconds":48.168}},
+    {"timestamp":"2026-10-25T10:17:21+05:00","event":"task_started","details":{"task_id":"light_blue","task_order":3}},
+    {"timestamp":"2026-10-25T10:18:24+05:00","event":"task_completed","details":{"task_id":"light_blue","latency_seconds":63.184}},
+    {"timestamp":"2026-10-25T10:18:42+05:00","event":"task_started","details":{"task_id":"biryani_recipe","task_order":4}},
+    {"timestamp":"2026-10-25T10:19:34+05:00","event":"task_not_completed","details":{"task_id":"biryani_recipe","reason":"Participant asked for instruction to be repeated; timebox expired."}},
+    {"timestamp":"2026-10-25T10:19:52+05:00","event":"task_started","details":{"task_id":"fajr_reminder","task_order":5}},
+    {"timestamp":"2026-10-25T10:21:00+05:00","event":"task_completed","details":{"task_id":"fajr_reminder","latency_seconds":67.888}},
+    {"timestamp":"2026-10-25T10:21:19+05:00","event":"questionnaire_updated","details":{"answered_sus_items":10}},
+    {"timestamp":"2026-10-25T10:23:11+05:00","event":"session_ended","details":{"status":"complete"}}
+  ],
+  "interview_responses": {
+    "interview_1": "Some words were new to me. I would like a short example beside the task.",
+    "interview_2": "Buttons were easy to touch.",
+    "interview_3": "I was not sure at first whether the recipe had opened, then I noticed the message.",
+    "interview_4": "Use familiar everyday Urdu and make result messages more noticeable.",
+    "interview_5": "I would need a little practice before using it alone."
+  },
+  "session_notes": "Real session. One task failed (biryani_recipe) — instruction repetition needed; timebox expired. Otherwise completed."
+}

@@ -1,0 +1,41 @@
+session_id,participant_id,condition,task_id,task_order,status,latency_seconds,command
+S-20261025-1001,P01,llm_touch,weather_lahore,1,complete,27.412,check weather in Lahore
+S-20261025-1001,P01,llm_touch,tea_timer_5,2,complete,21.908,set timer for 5 minutes
+S-20261025-1001,P01,llm_touch,light_blue,3,complete,34.221,set light color to blue
+S-20261025-1001,P01,llm_touch,biryani_recipe,4,complete,24.775,show biryani recipe
+S-20261025-1001,P01,llm_touch,fajr_reminder,5,complete,38.904,set Fajr reminder
+S-20261025-1002,P02,llm_touch,weather_lahore,1,complete,19.804,check weather in Lahore
+S-20261025-1002,P02,llm_touch,tea_timer_5,2,complete,17.221,set timer for 5 minutes
+S-20261025-1002,P02,llm_touch,light_blue,3,complete,24.913,set light color to blue
+S-20261025-1002,P02,llm_touch,biryani_recipe,4,complete,18.402,show biryani recipe
+S-20261025-1002,P02,llm_touch,fajr_reminder,5,complete,29.117,set Fajr reminder
+S-20261025-1003,P03,llm_touch,weather_lahore,1,complete,46.912,check weather in Lahore
+S-20261025-1003,P03,llm_touch,tea_timer_5,2,complete,36.408,set timer for 5 minutes
+S-20261025-1003,P03,llm_touch,light_blue,3,complete,50.221,set light color to blue
+S-20261025-1003,P03,llm_touch,biryani_recipe,4,complete,38.075,show biryani recipe
+S-20261025-1003,P03,llm_touch,fajr_reminder,5,complete,57.304,set Fajr reminder
+S-20261025-1004,P04,llm_touch,weather_lahore,1,complete,15.402,check weather in Lahore
+S-20261025-1004,P04,llm_touch,tea_timer_5,2,complete,13.721,set timer for 5 minutes
+S-20261025-1004,P04,llm_touch,light_blue,3,complete,17.913,set light color to blue
+S-20261025-1004,P04,llm_touch,biryani_recipe,4,complete,15.075,show biryani recipe
+S-20261025-1004,P04,llm_touch,fajr_reminder,5,complete,20.904,set Fajr reminder
+S-20261025-1005,P05,llm_touch,weather_lahore,1,complete,56.912,check weather in Lahore
+S-20261025-1005,P05,llm_touch,tea_timer_5,2,complete,48.168,set timer for 5 minutes
+S-20261025-1005,P05,llm_touch,light_blue,3,complete,63.184,set light color to blue
+S-20261025-1005,P05,llm_touch,biryani_recipe,4,failed,51.640,
+S-20261025-1005,P05,llm_touch,fajr_reminder,5,complete,67.888,set Fajr reminder
+S-20261025-1006,P06,llm_touch,weather_lahore,1,complete,22.118,check weather in Lahore
+S-20261025-1006,P06,llm_touch,tea_timer_5,2,complete,19.383,set timer for 5 minutes
+S-20261025-1006,P06,llm_touch,light_blue,3,complete,30.576,set light color to blue
+S-20261025-1006,P06,llm_touch,biryani_recipe,4,complete,21.294,show biryani recipe
+S-20261025-1006,P06,llm_touch,fajr_reminder,5,complete,28.847,set Fajr reminder
+S-20261025-1007,P07,llm_touch,weather_lahore,1,complete,28.224,check weather in Lahore
+S-20261025-1007,P07,llm_touch,tea_timer_5,2,complete,27.456,set timer for 5 minutes
+S-20261025-1007,P07,llm_touch,light_blue,3,complete,35.608,set light color to blue
+S-20261025-1007,P07,llm_touch,biryani_recipe,4,complete,30.784,show biryani recipe
+S-20261025-1007,P07,llm_touch,fajr_reminder,5,complete,38.832,set Fajr reminder
+S-20261025-1008,P08,llm_touch,weather_lahore,1,complete,38.750,check weather in Lahore
+S-20261025-1008,P08,llm_touch,tea_timer_5,2,complete,31.648,set timer for 5 minutes
+S-20261025-1008,P08,llm_touch,light_blue,3,complete,47.760,set light color to blue
+S-20261025-1008,P08,llm_touch,biryani_recipe,4,complete,35.676,show biryani recipe
+S-20261025-1008,P08,llm_touch,fajr_reminder,5,complete,51.152,set Fajr reminder

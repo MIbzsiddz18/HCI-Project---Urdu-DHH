@@ -1,0 +1,383 @@
+{
+  "schema_version": 1,
+  "synthetic_demo_only": true,
+  "session_id": "DEMO-SYNTH-20261015-P02",
+  "participant_id": "SYNTH-DEMO-P02",
+  "condition": "llm_touch",
+  "status": "complete",
+  "started_at": "2026-10-15T11:15:00+00:00",
+  "ended_at": "2026-10-15T11:19:21+00:00",
+  "demographics": {
+    "age": 68,
+    "gender": "Man",
+    "hearing_status": "Hard of Hearing (HoH)",
+    "hearing_device": "Hearing aid",
+    "language_background": "Urdu, Punjabi, some English",
+    "prior_ipa_experience": "Yes",
+    "voice_assistant_frequency": "Rarely",
+    "accessibility_needs": "Visible status changes; readable contrast; avoid relying on sound.",
+    "consent_confirmed": false
+  },
+  "tasks": [
+    {
+      "task_id": "weather_lahore",
+      "task_order": 1,
+      "task_goal_english": "Check today's weather in Lahore",
+      "task_goal_urdu": "لاہور میں آج کا موسم چیک کریں",
+      "expected_command": "check weather in Lahore",
+      "status": "complete",
+      "task_started_at": "2026-10-15T11:15:00+00:00",
+      "task_ended_at": "2026-10-15T11:15:20+00:00",
+      "latency_seconds": 20.2,
+      "action_verb_english": "Check",
+      "selected_option_urdu": "آج لاہور کا موسم چیک کریں",
+      "command": "check weather in Lahore",
+      "llm_model": "synthetic_local_fallback",
+      "llm_latency_seconds": null,
+      "llm_used_fallback": true,
+      "llm_error": ""
+    },
+    {
+      "task_id": "tea_timer_5",
+      "task_order": 2,
+      "task_goal_english": "Set a 5-minute timer for tea",
+      "task_goal_urdu": "چائے کے لیے ۵ منٹ کا ٹائمر لگائیں",
+      "expected_command": "set timer for 5 minutes",
+      "status": "complete",
+      "task_started_at": "2026-10-15T11:15:38+00:00",
+      "task_ended_at": "2026-10-15T11:15:55+00:00",
+      "latency_seconds": 17.6,
+      "action_verb_english": "Set",
+      "selected_option_urdu": "چائے کا ٹائمر پانچ منٹ پر لگائیں",
+      "command": "set timer for 5 minutes",
+      "llm_model": "synthetic_local_fallback",
+      "llm_latency_seconds": null,
+      "llm_used_fallback": true,
+      "llm_error": ""
+    },
+    {
+      "task_id": "light_blue",
+      "task_order": 3,
+      "task_goal_english": "Set the light to blue",
+      "task_goal_urdu": "بتی کو نیلا رنگ دیں",
+      "expected_command": "set light color to blue",
+      "status": "complete",
+      "task_started_at": "2026-10-15T11:16:13+00:00",
+      "task_ended_at": "2026-10-15T11:16:39+00:00",
+      "latency_seconds": 25.3,
+      "action_verb_english": "Change",
+      "selected_option_urdu": "بتی کا رنگ نیلا کریں",
+      "command": "set light color to blue",
+      "llm_model": "synthetic_local_fallback",
+      "llm_latency_seconds": null,
+      "llm_used_fallback": true,
+      "llm_error": ""
+    },
+    {
+      "task_id": "biryani_recipe",
+      "task_order": 4,
+      "task_goal_english": "Show a biryani recipe",
+      "task_goal_urdu": "بریانی کی ترکیب دکھائیں",
+      "expected_command": "show biryani recipe",
+      "status": "complete",
+      "task_started_at": "2026-10-15T11:16:57+00:00",
+      "task_ended_at": "2026-10-15T11:17:16+00:00",
+      "latency_seconds": 18.9,
+      "action_verb_english": "Show",
+      "selected_option_urdu": "بریانی بنانے کا طریقہ دیکھیں",
+      "command": "show biryani recipe",
+      "llm_model": "synthetic_local_fallback",
+      "llm_latency_seconds": null,
+      "llm_used_fallback": true,
+      "llm_error": ""
+    },
+    {
+      "task_id": "fajr_reminder",
+      "task_order": 5,
+      "task_goal_english": "Set a Fajr prayer reminder",
+      "task_goal_urdu": "فجر کے لیے یاد دہانی لگائیں",
+      "expected_command": "set Fajr reminder",
+      "status": "complete",
+      "task_started_at": "2026-10-15T11:17:34+00:00",
+      "task_ended_at": "2026-10-15T11:18:03+00:00",
+      "latency_seconds": 29.8,
+      "action_verb_english": "Set a reminder",
+      "selected_option_urdu": "فجر کی یاد دہانی سیٹ کریں",
+      "command": "set Fajr reminder",
+      "llm_model": "synthetic_local_fallback",
+      "llm_latency_seconds": null,
+      "llm_used_fallback": true,
+      "llm_error": ""
+    }
+  ],
+  "events": [
+    {
+      "timestamp": "2026-10-15T11:15:00+00:00",
+      "event": "session_started",
+      "details": {
+        "synthetic_demo_only": true,
+        "consent_confirmed": false
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:15:00+00:00",
+      "event": "task_started",
+      "details": {
+        "task_id": "weather_lahore",
+        "task_order": 1
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:15:05+00:00",
+      "event": "action_selected",
+      "details": {
+        "task_id": "weather_lahore",
+        "english": "Check"
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:15:08+00:00",
+      "event": "suggestions_generated",
+      "details": {
+        "task_id": "weather_lahore",
+        "suggestions": [
+          "آج لاہور کا موسم چیک کریں"
+        ],
+        "backend": "synthetic_local_fallback"
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:15:14+00:00",
+      "event": "suggestion_selected",
+      "details": {
+        "task_id": "weather_lahore",
+        "suggestion_urdu": "آج لاہور کا موسم چیک کریں"
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:15:20+00:00",
+      "event": "task_completed",
+      "details": {
+        "task_id": "weather_lahore",
+        "command": "check weather in Lahore",
+        "latency_seconds": 20.2
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:15:38+00:00",
+      "event": "task_started",
+      "details": {
+        "task_id": "tea_timer_5",
+        "task_order": 2
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:15:42+00:00",
+      "event": "action_selected",
+      "details": {
+        "task_id": "tea_timer_5",
+        "english": "Set"
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:15:45+00:00",
+      "event": "suggestions_generated",
+      "details": {
+        "task_id": "tea_timer_5",
+        "suggestions": [
+          "چائے کا ٹائمر پانچ منٹ پر لگائیں"
+        ],
+        "backend": "synthetic_local_fallback"
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:15:50+00:00",
+      "event": "suggestion_selected",
+      "details": {
+        "task_id": "tea_timer_5",
+        "suggestion_urdu": "چائے کا ٹائمر پانچ منٹ پر لگائیں"
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:15:55+00:00",
+      "event": "task_completed",
+      "details": {
+        "task_id": "tea_timer_5",
+        "command": "set timer for 5 minutes",
+        "latency_seconds": 17.6
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:16:13+00:00",
+      "event": "task_started",
+      "details": {
+        "task_id": "light_blue",
+        "task_order": 3
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:16:20+00:00",
+      "event": "action_selected",
+      "details": {
+        "task_id": "light_blue",
+        "english": "Change"
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:16:23+00:00",
+      "event": "suggestions_generated",
+      "details": {
+        "task_id": "light_blue",
+        "suggestions": [
+          "بتی کا رنگ نیلا کریں"
+        ],
+        "backend": "synthetic_local_fallback"
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:16:31+00:00",
+      "event": "suggestion_selected",
+      "details": {
+        "task_id": "light_blue",
+        "suggestion_urdu": "بتی کا رنگ نیلا کریں"
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:16:39+00:00",
+      "event": "task_completed",
+      "details": {
+        "task_id": "light_blue",
+        "command": "set light color to blue",
+        "latency_seconds": 25.3
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:16:57+00:00",
+      "event": "task_started",
+      "details": {
+        "task_id": "biryani_recipe",
+        "task_order": 4
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:17:01+00:00",
+      "event": "action_selected",
+      "details": {
+        "task_id": "biryani_recipe",
+        "english": "Show"
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:17:04+00:00",
+      "event": "suggestions_generated",
+      "details": {
+        "task_id": "biryani_recipe",
+        "suggestions": [
+          "بریانی بنانے کا طریقہ دیکھیں"
+        ],
+        "backend": "synthetic_local_fallback"
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:17:10+00:00",
+      "event": "suggestion_selected",
+      "details": {
+        "task_id": "biryani_recipe",
+        "suggestion_urdu": "بریانی بنانے کا طریقہ دیکھیں"
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:17:16+00:00",
+      "event": "task_completed",
+      "details": {
+        "task_id": "biryani_recipe",
+        "command": "show biryani recipe",
+        "latency_seconds": 18.9
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:17:34+00:00",
+      "event": "task_started",
+      "details": {
+        "task_id": "fajr_reminder",
+        "task_order": 5
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:17:41+00:00",
+      "event": "action_selected",
+      "details": {
+        "task_id": "fajr_reminder",
+        "english": "Set a reminder"
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:17:45+00:00",
+      "event": "suggestions_generated",
+      "details": {
+        "task_id": "fajr_reminder",
+        "suggestions": [
+          "فجر کی یاد دہانی سیٹ کریں"
+        ],
+        "backend": "synthetic_local_fallback"
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:17:54+00:00",
+      "event": "suggestion_selected",
+      "details": {
+        "task_id": "fajr_reminder",
+        "suggestion_urdu": "فجر کی یاد دہانی سیٹ کریں"
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:18:03+00:00",
+      "event": "task_completed",
+      "details": {
+        "task_id": "fajr_reminder",
+        "command": "set Fajr reminder",
+        "latency_seconds": 29.8
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:18:21+00:00",
+      "event": "questionnaire_updated",
+      "details": {
+        "synthetic_demo_only": true,
+        "answered_sus_items": 10
+      }
+    },
+    {
+      "timestamp": "2026-10-15T11:19:21+00:00",
+      "event": "session_ended",
+      "details": {
+        "status": "complete",
+        "synthetic_demo_only": true
+      }
+    }
+  ],
+  "questionnaire": {
+    "sus_responses": {
+      "q1": 4,
+      "q2": 2,
+      "q3": 5,
+      "q4": 2,
+      "q5": 4,
+      "q6": 2,
+      "q7": 4,
+      "q8": 2,
+      "q9": 5,
+      "q10": 2
+    },
+    "adjective_score": 6,
+    "nps_score": 9
+  },
+  "interview_responses": {
+    "interview_1": "I use voice assistants sometimes, but I miss responses when there is background noise.",
+    "interview_2": "The task instructions were clear after I read them once.",
+    "interview_3": "The confirmation text made the result clear without needing sound.",
+    "interview_4": "A little more spacing between choices would help on a smaller screen.",
+    "interview_5": "I would recommend trying this kind of visual interface."
+  },
+  "session_notes": "SYNTHETIC DEMO ONLY — entirely fictional example; not collected from people and not research evidence. No real consent was obtained; consent_confirmed is false."
+}

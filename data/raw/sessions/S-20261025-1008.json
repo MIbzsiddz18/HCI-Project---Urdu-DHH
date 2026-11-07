@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "session_id": "S-20261025-1008",
+  "participant_id": "P08",
+  "condition": "llm_touch",
+  "status": "complete",
+  "started_at": "2026-10-25T13:15:00+05:00",
+  "ended_at": "2026-10-25T13:22:05+05:00",
+  "demographics": {
+    "age": 69,
+    "gender": "Man",
+    "hearing_status": "Deaf",
+    "hearing_device": "None",
+    "language_background": "Urdu, Pakistan Sign Language (PSL)",
+    "prior_ipa_experience": "No",
+    "voice_assistant_frequency": "Never",
+    "accessibility_needs": "Visual-only interaction; large text; simple step-by-step flow.",
+    "consent_confirmed": true
+  },
+  "tasks": [
+    {"task_id": "weather_lahore", "task_order": 1, "status": "complete", "latency_seconds": 38.750, "command": "check weather in Lahore"},
+    {"task_id": "tea_timer_5",    "task_order": 2, "status": "complete", "latency_seconds": 31.648, "command": "set timer for 5 minutes"},
+    {"task_id": "light_blue",     "task_order": 3, "status": "complete", "latency_seconds": 47.760, "command": "set light color to blue"},
+    {"task_id": "biryani_recipe", "task_order": 4, "status": "complete", "latency_seconds": 35.676, "command": "show biryani recipe"},
+    {"task_id": "fajr_reminder",  "task_order": 5, "status": "complete", "latency_seconds": 51.152, "command": "set Fajr reminder"}
+  ],
+  "questionnaire": {
+    "sus_responses": {"q1":3,"q2":3,"q3":4,"q4":3,"q5":3,"q6":3,"q7":4,"q8":3,"q9":4,"q10":3},
+    "adjective_score": 5,
+    "nps_score": 7
+  },
+  "events": [
+    {"timestamp":"2026-10-25T13:15:00+05:00","event":"session_started","details":{"consent_confirmed":true}},
+    {"timestamp":"2026-10-25T13:15:00+05:00","event":"task_started","details":{"task_id":"weather_lahore","task_order":1}},
+    {"timestamp":"2026-10-25T13:15:39+05:00","event":"task_completed","details":{"task_id":"weather_lahore","latency_seconds":38.750}},
+    {"timestamp":"2026-10-25T13:15:57+05:00","event":"task_started","details":{"task_id":"tea_timer_5","task_order":2}},
+    {"timestamp":"2026-10-25T13:16:29+05:00","event":"task_completed","details":{"task_id":"tea_timer_5","latency_seconds":31.648}},
+    {"timestamp":"2026-10-25T13:16:47+05:00","event":"task_started","details":{"task_id":"light_blue","task_order":3}},
+    {"timestamp":"2026-10-25T13:17:35+05:00","event":"task_completed","details":{"task_id":"light_blue","latency_seconds":47.760}},
+    {"timestamp":"2026-10-25T13:17:53+05:00","event":"task_started","details":{"task_id":"biryani_recipe","task_order":4}},
+    {"timestamp":"2026-10-25T13:18:29+05:00","event":"task_completed","details":{"task_id":"biryani_recipe","latency_seconds":35.676}},
+    {"timestamp":"2026-10-25T13:18:47+05:00","event":"task_started","details":{"task_id":"fajr_reminder","task_order":5}},
+    {"timestamp":"2026-10-25T13:19:38+05:00","event":"task_completed","details":{"task_id":"fajr_reminder","latency_seconds":51.152}},
+    {"timestamp":"2026-10-25T13:19:56+05:00","event":"questionnaire_updated","details":{"answered_sus_items":10}},
+    {"timestamp":"2026-10-25T13:22:05+05:00","event":"session_ended","details":{"status":"complete"}}
+  ],
+  "interview_responses": {
+    "interview_1": "I have not used a voice assistant. The written steps were enough for most tasks.",
+    "interview_2": "The first choice was clear; I needed to pause on a few Urdu labels.",
+    "interview_3": "The reminder confirmation was easier to notice than the recipe confirmation.",
+    "interview_4": "Make every completed action equally visible.",
+    "interview_5": "I would want a family member to show me the app once."
+  },
+  "session_notes": "Real session. Older Deaf participant, no prior IPA use; slowest overall; requested consistent completion visibility."
+}

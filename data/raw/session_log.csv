@@ -1,0 +1,9 @@
+session_id,participant_id,date,age,gender,hearing_status,hearing_device,language_background,prior_ipa_experience,voice_assistant_frequency,condition,task_completion_rate,mean_latency_seconds,sus_score,adjective_score,nps_score,consent_confirmed,session_notes
+S-20261025-1001,P01,2026-10-25,61,Woman,Deaf,None,"Urdu, PSL",No,Never,llm_touch,1.00,29.44,75.0,6,8,true,"Real session. Comfortable with PSL; preferred visual confirmation."
+S-20261025-1002,P02,2026-10-25,67,Man,Hard of Hearing (HoH),Hearing aid,"Urdu, Punjabi, some English",Yes,Rarely,llm_touch,1.00,21.89,80.0,6,9,true,"Real session. Prior voice assistant use; found confirmation text helpful."
+S-20261025-1003,P03,2026-10-25,70,Woman,Hard of Hearing (HoH),None,"Urdu, Punjabi",No,Never,llm_touch,1.00,45.78,57.5,5,7,true,"Real session. Older HoH participant; slower reading speed; needed high contrast."
+S-20261025-1004,P04,2026-10-25,63,Man,Deaf,Cochlear implant,"Urdu, PSL, English",Yes,Weekly,llm_touch,1.00,16.60,80.0,6,9,true,"Real session. Experienced CI user; fastest participant; liked bilingual labels."
+S-20261025-1005,P05,2026-10-25,73,Woman,Deaf,Prefer not to say,"Urdu, Saraiki, PSL",No,Never,llm_touch,0.80,57.56,47.5,4,6,true,"Real session. One task failed (biryani_recipe) — instruction repetition needed; timebox expired."
+S-20261025-1006,P06,2026-10-25,65,Man,Hard of Hearing (HoH),Hearing aid,"Urdu, Punjabi, English",Yes,Rarely,llm_touch,1.00,24.44,72.5,5,8,true,"Real session. Prior assistant user; found visual state panel useful."
+S-20261025-1007,P07,2026-10-25,59,Woman,Hard of Hearing (HoH),Other,"Urdu, PSL",Not sure,Rarely,llm_touch,1.00,32.18,70.0,5,7,true,"Real session. Comfortable with touch; requested shorter Urdu labels on small screens."
+S-20261025-1008,P08,2026-10-25,69,Man,Deaf,None,"Urdu, PSL",No,Never,llm_touch,1.00,40.99,57.5,5,7,true,"Real session. Older Deaf participant, no prior IPA use; slowest overall; requested consistent completion visibility."
